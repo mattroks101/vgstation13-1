@@ -730,6 +730,10 @@ Thanks.
 				for(var/mob/living/M in G.target)
 					if(M && !(M in view(src)))
 						M.NotTargeted(G)
+	
+	for(var/mob/M in oview(src))
+		M.update_vision_cone()
+	update_vision_cone()
 
 /mob/living/proc/handle_hookchain(var/direct)
 	for(var/obj/item/weapon/gun/hookshot/hookshot in src)
@@ -1559,3 +1563,16 @@ Thanks.
 		"is_ventcrawling")
 
 	reset_vars_after_duration(resettable_vars, duration)
+
+/atom/movable/proc/receive_damage(atom/A)
+	var/pixel_x_diff = rand(-3,3)
+	var/pixel_y_diff = rand(-3,3)
+	animate(src, pixel_x = pixel_x + pixel_x_diff, pixel_y = pixel_y + pixel_y_diff, time = 2)
+	animate(pixel_x = initial(pixel_x), pixel_y = initial(pixel_y), time = 2)
+
+/mob/living/receive_damage(atom/A)
+	..()
+
+/mob/living/change_dir(new_dir, var/changer)
+	..()
+	update_vision_cone()

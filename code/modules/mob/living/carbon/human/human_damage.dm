@@ -327,6 +327,8 @@ This function restores all organs.
 
 			if(organ.take_damage(damage, 0, sharp, edge, used_weapon))
 				UpdateDamageIcon(1)
+			receive_damage()
+			
 		if(BURN)
 			damageoverlaytemp = 20
 			damage = damage * burn_damage_modifier

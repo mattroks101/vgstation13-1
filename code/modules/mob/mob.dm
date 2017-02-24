@@ -1436,6 +1436,8 @@ var/list/slot_equipment_priority = list( \
 	else if( lying != lying_prev )
 		update_icons()
 
+	update_vision_cone()
+
 	return canmove
 
 /mob/proc/reset_layer()
@@ -1448,6 +1450,7 @@ var/list/slot_equipment_priority = list( \
 	dir = EAST
 	Facing()
 	delayNextMove(movement_delay(),additive=1)
+	update_vision_cone()
 	return 1
 
 
@@ -1458,6 +1461,7 @@ var/list/slot_equipment_priority = list( \
 	dir = WEST
 	Facing()
 	delayNextMove(movement_delay(),additive=1)
+	update_vision_cone()
 	return 1
 
 
@@ -1468,6 +1472,7 @@ var/list/slot_equipment_priority = list( \
 	dir = NORTH
 	Facing()
 	delayNextMove(movement_delay(),additive=1)
+	update_vision_cone()
 	return 1
 
 
@@ -1478,6 +1483,7 @@ var/list/slot_equipment_priority = list( \
 	dir = SOUTH
 	Facing()
 	delayNextMove(movement_delay(),additive=1)
+	update_vision_cone()
 	return 1
 
 

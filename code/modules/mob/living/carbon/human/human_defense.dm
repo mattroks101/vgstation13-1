@@ -243,6 +243,7 @@ emp_act
 					knock_out_teeth(user)
 
 	apply_damage(I.force, I.damtype, affecting, armor , I.is_sharp(), used_weapon = I)
+	receive_damage()
 
 	var/bloody = 0
 	if(((I.damtype == BRUTE) || (I.damtype == HALLOSS)) && prob(25 + (I.force * 2)))
