@@ -3,8 +3,8 @@
 Making Bombs with ZAS:
 Make burny fire with lots of burning
 Draw off 5000K gas from burny fire
-separate gas into oxygen and phoron components
-Obtain phoron and oxygen tanks filled up about 50-75% with normal-temp gas
+separate gas into oxygen and plasma components
+Obtain plasma and oxygen tanks filled up about 50-75% with normal-temp gas
 Fill rest with super hot gas from separated canisters, they should be about 125C now.
 Attach to transfer valve and open. BOOM.
 
@@ -91,18 +91,18 @@ Attach to transfer valve and open. BOOM.
 		return 0
 	if(fire_protection > world.time-300)
 		return 0
-	if(locate(/obj/fire) in src)
+	if(locate(/obj/effect/fire) in src)
 		return 1
 	var/datum/gas_mixture/air_contents = return_air()
-	if(!air_contents || exposed_temperature < PHORON_MINIMUM_BURN_TEMPERATURE)
+	if(!air_contents || exposed_temperature < PLASMA_MINIMUM_BURN_TEMPERATURE)
 		return 0
 
 	var/igniting = 0
 
 	if(air_contents.check_combustability(src, surfaces))
 		igniting = 1
-		if(! (locate(/obj/fire) in src))
-			new /obj/fire(src)
+		if(! (locate(/obj/effect/fire) in src))
+			new /obj/effect/fire(src)
 
 	return igniting
 
@@ -119,7 +119,7 @@ Attach to transfer valve and open. BOOM.
 		fuel_found += A.getFireFuel()
 	return fuel_found
 
-/obj/fire
+/obj/effect/fire
 	//Icon for fire on turfs.
 
 	anchored = 1
@@ -134,7 +134,7 @@ Attach to transfer valve and open. BOOM.
 
 	light_color = LIGHT_COLOR_FIRE
 
-/obj/fire/proc/Extinguish()
+/obj/effect/fire/proc/Extinguish()
 	var/turf/simulated/S=loc
 
 	if(istype(S))
@@ -146,7 +146,7 @@ Attach to transfer valve and open. BOOM.
 	qdel(src)
 
 
-/obj/fire/process()
+/obj/effect/fire/process()
 	if(timestopped)
 		return 0
 	. = 1
@@ -231,9 +231,9 @@ Attach to transfer valve and open. BOOM.
 					continue
 
 				//Spread the fire.
-				if(!(locate(/obj/fire) in enemy_tile))
+				if(!(locate(/obj/effect/fire) in enemy_tile))
 					if( prob( 50 + 50 * (firelevel/zas_settings.Get(/datum/ZAS_Setting/fire_firelevel_multiplier)) ) && S.Cross(null, enemy_tile, 0,0) && enemy_tile.Cross(null, S, 0,0))
-						new/obj/fire(enemy_tile)
+						new/obj/effect/fire(enemy_tile)
 
 	//seperate part of the present gas
 	//this is done to prevent the fire burning all gases in a single pass
@@ -249,13 +249,13 @@ Attach to transfer valve and open. BOOM.
 ///////////////////////////////// FLOW HAS BEEN REMERGED /// feel free to delete the fire again from here on //////////////////////////////////////////////////////////////////
 
 
-/obj/fire/New()
+/obj/effect/fire/New()
 	. = ..()
 	dir = pick(cardinal)
 	set_light(3)
 	air_master.active_hotspots.Add(src)
 
-/obj/fire/Destroy()
+/obj/effect/fire/Destroy()
 	air_master.active_hotspots.Remove(src)
 
 	set_light(0)
@@ -272,7 +272,7 @@ datum/gas_mixture/proc/zburn(var/turf/T, force_burn)
 	//  In the aforementioned cases, it's null. - N3X.
 	var/value = 0
 
-	if((temperature > PHORON_MINIMUM_BURN_TEMPERATURE || force_burn) && check_recombustability(T))
+	if((temperature > PLASMA_MINIMUM_BURN_TEMPERATURE || force_burn) && check_recombustability(T))
 		var/total_fuel = 0
 		var/datum/gas/volatile_fuel/fuel = locate() in trace_gases
 
@@ -347,7 +347,7 @@ datum/gas_mixture/proc/zburn(var/turf/T, force_burn)
 	var/datum/gas/volatile_fuel/fuel = locate() in trace_gases
 
 	if(oxygen && (toxins || fuel))
-		if(QUANTIZE(toxins * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= MOLES_PHORON_VISIBLE)
+		if(QUANTIZE(toxins * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= MOLES_PLASMA_VISIBLE)
 			return 1
 		if(fuel && QUANTIZE(fuel.moles * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= BASE_ZAS_FUEL_REQ)
 			return 1
@@ -391,7 +391,7 @@ datum/gas_mixture/proc/check_combustability(var/turf/T, var/objects)
 	var/datum/gas/volatile_fuel/fuel = locate() in trace_gases
 
 	if(oxygen && (toxins || fuel))
-		if(QUANTIZE(toxins * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= MOLES_PHORON_VISIBLE)
+		if(QUANTIZE(toxins * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= MOLES_PLASMA_VISIBLE)
 			return 1
 		if(fuel && QUANTIZE(fuel.moles * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= BASE_ZAS_FUEL_REQ)
 			return 1

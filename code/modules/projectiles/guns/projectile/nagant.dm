@@ -64,7 +64,7 @@
 	..()
 	if(istype(src, /obj/item/weapon/gun/projectile/nagant/obrez))
 		return
-	if(istype(A, /obj/item/weapon/circular_saw) || istype(A, /obj/item/weapon/melee/energy) || istype(A, /obj/item/weapon/pickaxe/phoroncutter))
+	if(istype(A, /obj/item/weapon/circular_saw) || istype(A, /obj/item/weapon/melee/energy) || istype(A, /obj/item/weapon/pickaxe/plasmacutter))
 		to_chat(user, "<span class='notice'>You begin to shorten the barrel of \the [src].</span>")
 		if(getAmmo())
 			user.visible_message("<span class='danger'>Take the ammo out first.</span>", "<span class='danger'>You need to take the ammo out first.</span>")
@@ -119,7 +119,7 @@
 	if(previousturf && LinkBlocked(previousturf, T))
 		return
 	if(!T.density && !istype(T, /turf/space))
-		new /obj/fire(T) //add some fire as an effect because low intensity liquid fuel looks weak
+		new /obj/effect/fire(T) //add some fire as an effect because low intensity liquid fuel looks weak
 		getFromPool(/obj/effect/decal/cleanable/liquid_fuel, T, 0.1, get_dir(T.loc, T)) //spawn some fuel at the turf
 		T.hotspot_expose(500,500) //light it on fire
 		previousturf = null

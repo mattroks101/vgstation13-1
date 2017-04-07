@@ -6,8 +6,8 @@
 
 	maxHealth = 25
 	health = 25
-	phoron = 50
-	max_phoron = 50
+	plasma = 50
+	max_plasma = 50
 	size = SIZE_TINY
 
 	var/growth = 0
@@ -26,8 +26,8 @@
 	default_language = all_languages[LANGUAGE_XENO]
 	..()
 
-	add_spell(new /spell/aoe_turf/alien_hide, "alien_spell_ready", /obj/screen/movable/spell_master/alien)
-	add_spell(new /spell/aoe_turf/evolve/larva, "alien_spell_ready", /obj/screen/movable/spell_master/alien)
+	add_spell(new /spell/aoe_turf/alien_hide, "alien_spell_ready", /obj/abstract/screen/movable/spell_master/alien)
+	add_spell(new /spell/aoe_turf/evolve/larva, "alien_spell_ready", /obj/abstract/screen/movable/spell_master/alien)
 
 //This needs to be fixed
 /mob/living/carbon/alien/larva/Stat()
@@ -35,7 +35,7 @@
 	if(statpanel("Status"))
 		stat(null, "Progress: [growth]/[LARVA_GROW_TIME]")
 
-/mob/living/carbon/alien/larva/AdjustPhoron(amount)
+/mob/living/carbon/alien/larva/AdjustPlasma(amount)
 	if(stat != DEAD)
 		growth = min(growth + 1, LARVA_GROW_TIME)
 	..(amount)

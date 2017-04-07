@@ -162,6 +162,7 @@
 	src.modules += new /obj/item/weapon/revivalprod(src)
 	src.modules += new /obj/item/weapon/crowbar(src)
 	src.modules += new /obj/item/weapon/inflatable_dispenser/robot(src)
+	src.modules += new /obj/item/roller_holder(src)
 	src.emag = new /obj/item/weapon/reagent_containers/spray(src)
 	sensor_augs = list("Medical", "Disable")
 
@@ -276,7 +277,7 @@
 
 
 /obj/item/weapon/robot_module/security
-	name = "security robot module"
+	name = "peacekeeper robot module"
 
 /obj/item/weapon/robot_module/security/New()
 	..()
@@ -414,7 +415,7 @@
 
 /obj/item/weapon/robot_module/combat/New()
 	src.modules += new /obj/item/weapon/gun/energy/laser/cyborg(src)
-	src.modules += new /obj/item/weapon/pickaxe/phoroncutter(src)
+	src.modules += new /obj/item/weapon/pickaxe/plasmacutter(src)
 	src.modules += new /obj/item/borg/combat/shield(src)
 	src.modules += new /obj/item/borg/combat/mobility(src)
 	src.modules += new /obj/item/weapon/wrench(src) //Is a combat android really going to be stopped by a chair?
@@ -425,7 +426,7 @@
 	fix_modules()
 
 /obj/item/weapon/robot_module/tg17355
-	name = "peacekeeper robot module"
+	name = "tg17355 robot module"
 
 /obj/item/weapon/robot_module/tg17355/New()
 	..()

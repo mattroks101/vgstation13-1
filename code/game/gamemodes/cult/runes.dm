@@ -1312,9 +1312,9 @@
 			usr.visible_message("<span class='warning'> In flash of red light, a set of armor appears on [usr].</span>", \
 			"<span class='warning'>You are blinded by the flash of red light! After you're able to see again, you see that you are now wearing a set of armor.</span>")
 			var/datum/game_mode/cult/mode_ticker = ticker.mode
-			if(isphoronman(P))
-				P.equip_to_slot_or_del(new /obj/item/clothing/head/helmet/space/phoronman/cultist(P), slot_head)
-				P.equip_to_slot_or_del(new /obj/item/clothing/suit/space/phoronman/cultist(P), slot_wear_suit)
+			if(isplasmaman(P))
+				P.equip_to_slot_or_del(new /obj/item/clothing/head/helmet/space/plasmaman/cultist(P), slot_head)
+				P.equip_to_slot_or_del(new /obj/item/clothing/suit/space/plasmaman/cultist(P), slot_wear_suit)
 			else if((istype(mode_ticker) && mode_ticker.narsie_condition_cleared) || (universe.name == "Hell Rising"))
 				user.equip_to_slot_or_del(new /obj/item/clothing/head/helmet/space/cult(user), slot_head)
 				user.equip_to_slot_or_del(new /obj/item/clothing/suit/space/cult(user), slot_wear_suit)
@@ -1344,9 +1344,9 @@
 					M.visible_message("<span class='warning'> In flash of red light, and a set of armor appears on [M]...</span>", \
 					"<span class='warning'>You are blinded by the flash of red light! After you're able to see again, you see that you are now wearing a set of armor.</span>")
 					var/datum/game_mode/cult/mode_ticker = ticker.mode
-					if(isphoronman(P))
-						P.equip_to_slot_or_del(new /obj/item/clothing/head/helmet/space/phoronman/cultist(P), slot_head)
-						P.equip_to_slot_or_del(new /obj/item/clothing/suit/space/phoronman/cultist(P), slot_wear_suit)
+					if(isplasmaman(P))
+						P.equip_to_slot_or_del(new /obj/item/clothing/head/helmet/space/plasmaman/cultist(P), slot_head)
+						P.equip_to_slot_or_del(new /obj/item/clothing/suit/space/plasmaman/cultist(P), slot_wear_suit)
 					else if((istype(mode_ticker) && mode_ticker.narsie_condition_cleared) || (universe.name == "Hell Rising"))
 						M.equip_to_slot_or_del(new /obj/item/clothing/head/helmet/space/cult(M), slot_head)
 						M.equip_to_slot_or_del(new /obj/item/clothing/suit/space/cult(M), slot_wear_suit)
@@ -1423,6 +1423,12 @@
 								M = null
 								to_chat(C, "<B>You are now an Artificer. You are incredibly weak and fragile, but you are able to construct new floors and walls, to break some walls apart, to repair allied constructs (by clicking on them), </B><I>and most important of all create new constructs</I><B> (Use your Artificer spell to summon a new construct shell and Summon Soulstone to create a new soulstone).</B>")
 								ticker.mode.update_cult_icons_added(C.mind)
+								for(var/spell/S in C.spell_list)
+									if(S.charge_type & Sp_RECHARGE)
+										if(S.charge_counter == S.charge_max) //Spell is fully charged - let the proc handle everything
+											S.take_charge()
+										else //Spell is on cooldown and already recharging - there's no need to call S.process(), just reset charges to 0
+											S.charge_counter = 0
 				qdel(src)
 				return
 			else

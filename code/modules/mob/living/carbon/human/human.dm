@@ -10,7 +10,6 @@
 	var/list/hud_list[9]
 	var/datum/species/species //Contains icon generation and language information, set during New().
 	var/embedded_flag	  //To check if we've need to roll for damage on movement while an item is imbedded in us.
-	var/flavortown
 
 /mob/living/carbon/human/dummy
 	real_name = "Test Dummy"
@@ -52,9 +51,9 @@
 	h_style = "Bald"
 	..(new_loc, "Skeletal Vox")
 
-/mob/living/carbon/human/phoron/New(var/new_loc, delay_ready_dna = 0)
+/mob/living/carbon/human/plasma/New(var/new_loc, delay_ready_dna = 0)
 	h_style = "Bald"
-	..(new_loc, "Phoronman")
+	..(new_loc, "Plasmaman")
 
 /mob/living/carbon/human/muton/New(var/new_loc, delay_ready_dna = 0)
 	h_style = "Bald"
@@ -141,29 +140,29 @@
 	hud_list[SPECIALROLE_HUD] = image('icons/mob/hud.dmi', src, "hudblank")
 	hud_list[STATUS_HUD_OOC]  = image('icons/mob/hud.dmi', src, "hudhealthy")
 
-	obj_overlays[FIRE_LAYER]		= getFromPool(/obj/Overlays/fire_layer)
-	obj_overlays[MUTANTRACE_LAYER]	= getFromPool(/obj/Overlays/mutantrace_layer)
-	obj_overlays[MUTATIONS_LAYER]	= getFromPool(/obj/Overlays/mutations_layer)
-	obj_overlays[DAMAGE_LAYER]		= getFromPool(/obj/Overlays/damage_layer)
-	obj_overlays[UNIFORM_LAYER]		= getFromPool(/obj/Overlays/uniform_layer)
-	obj_overlays[ID_LAYER]			= getFromPool(/obj/Overlays/id_layer)
-	obj_overlays[SHOES_LAYER]		= getFromPool(/obj/Overlays/shoes_layer)
-	obj_overlays[GLOVES_LAYER]		= getFromPool(/obj/Overlays/gloves_layer)
-	obj_overlays[EARS_LAYER]		= getFromPool(/obj/Overlays/ears_layer)
-	obj_overlays[SUIT_LAYER]		= getFromPool(/obj/Overlays/suit_layer)
-	obj_overlays[GLASSES_LAYER]		= getFromPool(/obj/Overlays/glasses_layer)
-	obj_overlays[BELT_LAYER]		= getFromPool(/obj/Overlays/belt_layer)
-	obj_overlays[SUIT_STORE_LAYER]	= getFromPool(/obj/Overlays/suit_store_layer)
-	obj_overlays[BACK_LAYER]		= getFromPool(/obj/Overlays/back_layer)
-	obj_overlays[HAIR_LAYER]		= getFromPool(/obj/Overlays/hair_layer)
-	obj_overlays[GLASSES_OVER_HAIR_LAYER] = getFromPool(/obj/Overlays/glasses_over_hair_layer)
-	obj_overlays[FACEMASK_LAYER]	= getFromPool(/obj/Overlays/facemask_layer)
-	obj_overlays[HEAD_LAYER]		= getFromPool(/obj/Overlays/head_layer)
-	obj_overlays[HANDCUFF_LAYER]	= getFromPool(/obj/Overlays/handcuff_layer)
-	obj_overlays[LEGCUFF_LAYER]		= getFromPool(/obj/Overlays/legcuff_layer)
-	//obj_overlays[HAND_LAYER]		= getFromPool(/obj/Overlays/hand_layer) //moved to human/update_inv_hand()
-	obj_overlays[TAIL_LAYER]		= getFromPool(/obj/Overlays/tail_layer)
-	obj_overlays[TARGETED_LAYER]	= getFromPool(/obj/Overlays/targeted_layer)
+	obj_overlays[FIRE_LAYER]		= getFromPool(/obj/abstract/Overlays/fire_layer)
+	obj_overlays[MUTANTRACE_LAYER]	= getFromPool(/obj/abstract/Overlays/mutantrace_layer)
+	obj_overlays[MUTATIONS_LAYER]	= getFromPool(/obj/abstract/Overlays/mutations_layer)
+	obj_overlays[DAMAGE_LAYER]		= getFromPool(/obj/abstract/Overlays/damage_layer)
+	obj_overlays[UNIFORM_LAYER]		= getFromPool(/obj/abstract/Overlays/uniform_layer)
+	obj_overlays[ID_LAYER]			= getFromPool(/obj/abstract/Overlays/id_layer)
+	obj_overlays[SHOES_LAYER]		= getFromPool(/obj/abstract/Overlays/shoes_layer)
+	obj_overlays[GLOVES_LAYER]		= getFromPool(/obj/abstract/Overlays/gloves_layer)
+	obj_overlays[EARS_LAYER]		= getFromPool(/obj/abstract/Overlays/ears_layer)
+	obj_overlays[SUIT_LAYER]		= getFromPool(/obj/abstract/Overlays/suit_layer)
+	obj_overlays[GLASSES_LAYER]		= getFromPool(/obj/abstract/Overlays/glasses_layer)
+	obj_overlays[BELT_LAYER]		= getFromPool(/obj/abstract/Overlays/belt_layer)
+	obj_overlays[SUIT_STORE_LAYER]	= getFromPool(/obj/abstract/Overlays/suit_store_layer)
+	obj_overlays[BACK_LAYER]		= getFromPool(/obj/abstract/Overlays/back_layer)
+	obj_overlays[HAIR_LAYER]		= getFromPool(/obj/abstract/Overlays/hair_layer)
+	obj_overlays[GLASSES_OVER_HAIR_LAYER] = getFromPool(/obj/abstract/Overlays/glasses_over_hair_layer)
+	obj_overlays[FACEMASK_LAYER]	= getFromPool(/obj/abstract/Overlays/facemask_layer)
+	obj_overlays[HEAD_LAYER]		= getFromPool(/obj/abstract/Overlays/head_layer)
+	obj_overlays[HANDCUFF_LAYER]	= getFromPool(/obj/abstract/Overlays/handcuff_layer)
+	obj_overlays[LEGCUFF_LAYER]		= getFromPool(/obj/abstract/Overlays/legcuff_layer)
+	//obj_overlays[HAND_LAYER]		= getFromPool(/obj/abstract/Overlays/hand_layer) //moved to human/update_inv_hand()
+	obj_overlays[TAIL_LAYER]		= getFromPool(/obj/abstract/Overlays/tail_layer)
+	obj_overlays[TARGETED_LAYER]	= getFromPool(/obj/abstract/Overlays/targeted_layer)
 
 	..()
 
@@ -188,17 +187,6 @@
 				to_chat(src, "<b>Keep an eye out on the hunger indicator on the right of your screen; it will start flashing red and black when you're close to starvation.</b>")
 
 	update_colour(0,1)
-	generate_flavortown()
-
-/mob/living/carbon/human/proc/generate_flavortown()
-	var/heshe = "she"
-	var/himher = "her"
-	var/hisher = "her"
-	if(gender == "male")
-		heshe = "he"
-		himher = "him"
-		hisher = "his"
-	flavortown = "Although [heshe] seems like a[pick("n ordinary"," regular"," normal"," boring"," cute","n intriguing")] [pick("spaceman","person","hero","lady")], [heshe] is actually [pick("a well known space criminal who escaped from jail","a supermodel","a dark ethereal being that is worshipped by a cult","an amazing soldier who served in hundreds of space battles and is the most well decorated hero in the entire universe and is the person you personally look up to and want to be more like","the universal record holder for most people murdered with a fireaxe in a day","the president of an entire planet","a broody assassin sent here to kill the CEO of Nanotrasen","a mob boss that everyone fears and respects","your father who went through a few sex changes because [heshe] couldn't decide on [hisher] real gender","an anthromorphic pony","the return of Jesus Christ","the most skilled engineer this side of milky way galaxy","Adolf Hitler after he was cloned by Nanotrasen since they wanted to get rid of the space jews and there was only one man they could count on but [heshe] escaped from the facility they were using [hisher] ideas from and is now going lone wolf","pretty boring","amazingly attractive and everyone fawns over [himher] to the point [heshe] gets really uncomfortable being out in public so [heshe] got a job here at Nanotrasen","an ex-Spetsnaz soldier who got cryogenically frozen in the year 1997 and was just recently awoken in the age of space and really wants to kill people since [heshe] doesn't like the fact that space is so shitty compared to Russia")]. \nYou immediately notice just how [pick("amazing","wondrous","outstanding","beautiful","cool","pretty","slitted")] [hisher] [pick("cerulean","celery green","slate gray","royal purple","bloodshot red","brilliant gold","completely void","heavenly white","poo brown","sparkling emerald","feline yellow","christmas")] and [pick("cerulean","celery green","slate gray","royal purple","bloodshot red","brilliant gold","completely void","heavenly white","poo brown","sparkling emerald","feline yellow","christmas")] colored [pick("eyes","glistening orbs","holes where [hisher] eyes should be")] are."
 
 /mob/living/carbon/human/player_panel_controls()
 	var/html=""
@@ -1287,7 +1275,7 @@
 		src.verbs |= species.abilities
 	if(species.spells)
 		for(var/spell in species.spells)
-			add_spell(spell, "racial_spell_ready", /obj/screen/movable/spell_master/racial)
+			add_spell(spell, "racial_spell_ready", /obj/abstract/screen/movable/spell_master/racial)
 	if(force_organs || !src.organs || !src.organs.len)
 		src.species.create_organs(src)
 	var/datum/organ/internal/eyes/E = src.internal_organs_by_name["eyes"]
@@ -1785,3 +1773,8 @@
 		O.send_to_past(duration)
 
 	updatehealth()
+
+/mob/living/carbon/human/attack_icon()
+	if(M_HULK in mutations)
+		return image(icon = 'icons/mob/attackanims.dmi', icon_state = "hulk")
+	else return image(icon = 'icons/mob/attackanims.dmi', icon_state = "default")

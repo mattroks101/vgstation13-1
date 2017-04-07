@@ -17,14 +17,14 @@
 
 //Hud stuff
 
-	var/obj/screen/cells = null
-	var/obj/screen/inv1 = null
-	var/obj/screen/inv2 = null
-	var/obj/screen/inv3 = null
-	var/obj/screen/sensor = null
+	var/obj/abstract/screen/cells = null
+	var/obj/abstract/screen/inv1 = null
+	var/obj/abstract/screen/inv2 = null
+	var/obj/abstract/screen/inv3 = null
+	var/obj/abstract/screen/sensor = null
 
 	var/shown_robot_modules = 0
-	var/obj/screen/robot_modules_background
+	var/obj/abstract/screen/robot_modules_background
 
 //3 Modules can be activated at any one time.
 	var/obj/item/weapon/robot_module/module = null
@@ -231,8 +231,6 @@
 
 /proc/getAvailableRobotModules()
 	var/list/modules = list("Standard", "Engineering", "Medical", "Supply", "Janitor", "Service", "Peacekeeper")
-	if(security_level >= SEC_LEVEL_BLUE)
-		modules+="Security"
 	if(security_level == SEC_LEVEL_RED) //Add crisis to this check if you want to make it available at an admin's whim
 		modules+="Combat"
 	return modules
@@ -315,7 +313,7 @@
 			module_sprites["Arachne"] = "arachne"
 			speed = -2
 
-		if("Security")
+		if("Peacekeeper")
 			module = new /obj/item/weapon/robot_module/security(src)
 			radio.insert_key(new/obj/item/device/encryptionkey/headset_sec(radio))
 			module_sprites["Basic"] = "secborg"
@@ -329,7 +327,7 @@
 			to_chat(src, "<span class='warning'><big><b>Just a reminder, by default you do not follow space law, you follow your lawset</b></big></span>")
 			speed = 0
 
-		if("Peacekeeper")
+		if("TG17355")
 			module = new /obj/item/weapon/robot_module/tg17355(src)
 			module_sprites["Peacekeeper"] = "peaceborg"
 			module_sprites["Omoikane"] = "omoikane"
@@ -998,7 +996,7 @@
 		if (I_HURT)
 			if(M.unarmed_attack_mob(src))
 				if(prob(8))
-					flash_eyes(visual = 1, type = /obj/screen/fullscreen/flash/noise)
+					flash_eyes(visual = 1, type = /obj/abstract/screen/fullscreen/flash/noise)
 
 		if (I_DISARM)
 			if(!(lying))

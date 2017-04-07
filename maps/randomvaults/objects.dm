@@ -74,6 +74,9 @@
 
 /area/vault/prison
 
+/obj/docking_port/destination/vault
+	var/valid_random_destination = TRUE //If FALSE, random shuttle destination disks can't pick this docking port
+
 /obj/item/weapon/disk/shuttle_coords/vault/prison
 	destination = /obj/docking_port/destination/vault/prison
 
@@ -517,13 +520,13 @@
 /obj/machinery/portable_atmospherics/canister/old/attack_ai()
 	return
 
-/obj/machinery/portable_atmospherics/canister/old/phoron
+/obj/machinery/portable_atmospherics/canister/old/plasma
 	name = "Canister: \[Toxins\]"
 	icon_state = "orangeold"
 	canister_color = "orangeold"
 	can_label = 0
 
-/obj/machinery/portable_atmospherics/canister/old/phoron/New(loc)
+/obj/machinery/portable_atmospherics/canister/old/plasma/New(loc)
 	..(loc)
 	air_contents.adjust(tx = (maximum_pressure * filled) * air_contents.volume / (R_IDEAL_GAS_EQUATION * air_contents.temperature))
 	update_icon()

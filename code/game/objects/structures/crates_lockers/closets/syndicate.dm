@@ -80,13 +80,13 @@
 		if(pickednum >= 5)
 			new /obj/item/stack/sheet/glass/glass(src, rand(common_min, common_max))
 
-		//Plasteel (common ore) Because it has a million more uses then phoron
+		//Plasteel (common ore) Because it has a million more uses then plasma
 		if(pickednum >= 10)
 			new /obj/item/stack/sheet/plasteel(src, rand(common_min, common_max))
 
-		//Phoron (rare ore)
+		//Plasma (rare ore)
 		if(pickednum >= 15)
-			new /obj/item/stack/sheet/mineral/phoron(src, rand(rare_min, rare_max))
+			new /obj/item/stack/sheet/mineral/plasma(src, rand(rare_min, rare_max))
 
 		//Silver (rare ore)
 		if(pickednum >= 20)
@@ -119,7 +119,7 @@
 		/obj/item/stack/sheet/glass/glass,
 		/obj/item/stack/sheet/mineral/gold,
 		/obj/item/stack/sheet/mineral/silver,
-		/obj/item/stack/sheet/mineral/phoron,
+		/obj/item/stack/sheet/mineral/plasma,
 		/obj/item/stack/sheet/mineral/uranium,
 		/obj/item/stack/sheet/mineral/diamond,
 		/obj/item/stack/sheet/mineral/clown,
@@ -162,7 +162,7 @@
 
 	New()
 		sleep(2)
-		new /obj/map/spawner/space/vox/trader/spacesuit(src)
+		new /obj/abstract/map/spawner/space/vox/trader/spacesuit(src)
 		new /obj/item/clothing/mask/breath/vox(src)
 		new /obj/item/clothing/shoes/magboots/vox(src)
 		new /obj/item/clothing/under/vox/vox_casual(src)

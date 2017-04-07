@@ -3,10 +3,10 @@
 	caste = "s"
 	maxHealth = 175
 	health = 125
-	phoron = 100
-	max_phoron = 250
+	plasma = 100
+	max_plasma = 250
 	icon_state = "aliens_s"
-	phoron_rate = 10
+	plasma_rate = 10
 
 //As far as movement goes, Sentinels are average
 
@@ -23,8 +23,8 @@
 
 /mob/living/carbon/alien/humanoid/sentinel/add_spells_and_verbs()
 	..()
-	add_spell(new /spell/targeted/projectile/alienneurotoxin, "alien_spell_ready", /obj/screen/movable/spell_master/alien)
-	add_spell(new /spell/alienacid, "alien_spell_ready", /obj/screen/movable/spell_master/alien)
+	add_spell(new /spell/targeted/projectile/alienneurotoxin, "alien_spell_ready", /obj/abstract/screen/movable/spell_master/alien)
+	add_spell(new /spell/alienacid, "alien_spell_ready", /obj/abstract/screen/movable/spell_master/alien)
 	verbs.Add(/mob/living/carbon/alien/humanoid/proc/corrosive_acid)
 
 /mob/living/carbon/alien/humanoid/sentinel

@@ -99,12 +99,17 @@
 		ore = getFromPool(/obj/item/stack/sheet/metal, get_turf(src))
 	else
 		var/P = text2path("/obj/item/stack/sheet/mineral/[prefix]")
-		ore = new P(get_turf(src))
-	ore.amount = oreAmount
-	if(devastated)
-		ore.amount -= 2
+		if(P)
+			ore = new P(get_turf(src))
+
+	if(ore)
+		var/new_amount = oreAmount
+		if(devastated)
+			new_amount -= 2
+
+		ore.set_amount(new_amount)
+
 	qdel(src)
-	return
 
 /obj/machinery/door/mineral/ex_act(severity = 1)
 	switch(severity)
@@ -119,8 +124,6 @@
 		if(3)
 			hardness -= 0.1
 			CheckHardness()
-	return
-
 
 /obj/machinery/door/mineral/iron
 	prefix = "metal"
@@ -153,23 +156,23 @@
 		..()
 		opacity = 0
 
-/obj/machinery/door/mineral/transparent/phoron
-	prefix = "phoron"
-	icon_state = "phorondoor_closed"
+/obj/machinery/door/mineral/transparent/plasma
+	prefix = "plasma"
+	icon_state = "plasmadoor_closed"
 	hardness = 4
 
-/obj/machinery/door/mineral/transparent/phoron/attackby(obj/item/weapon/W as obj, mob/user as mob)
+/obj/machinery/door/mineral/transparent/plasma/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	if(istype(W,/obj/item/weapon/weldingtool))
 		var/obj/item/weapon/weldingtool/WT = W
 		if(WT.remove_fuel(0, user))
 			TemperatureAct(100)
 	return ..()
 
-/obj/machinery/door/mineral/transparent/phoron/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
+/obj/machinery/door/mineral/transparent/plasma/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	if(exposed_temperature > 300)
 		TemperatureAct(exposed_temperature)
 
-/obj/machinery/door/mineral/transparent/phoron/proc/TemperatureAct(temperature)
+/obj/machinery/door/mineral/transparent/plasma/proc/TemperatureAct(temperature)
 	for(var/turf/simulated/floor/target_tile in range(2,loc))
 
 		var/datum/gas_mixture/napalm = new //Napalm? Whelp. There should be a better way for this.
@@ -242,6 +245,7 @@
 	prefix = ""
 	icon = 'icons/obj/doors/morgue.dmi'
 	icon_state = "door_closed"
+	hardness = 1 //very weak
 
 /obj/machinery/door/mineral/hive/New()
 	..()

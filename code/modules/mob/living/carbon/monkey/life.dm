@@ -378,7 +378,7 @@
 
 	if(Toxins_pp > safe_toxins_max) // Too much toxins
 		var/ratio = (breath.toxins/safe_toxins_max) * 10
-		//adjustToxLoss(Clamp(ratio, MIN_PHORON_DAMAGE, MAX_PHORON_DAMAGE))	//Limit amount of damage toxin exposure can do per second
+		//adjustToxLoss(Clamp(ratio, MIN_PLASMA_DAMAGE, MAX_PLASMA_DAMAGE))	//Limit amount of damage toxin exposure can do per second
 		if(wear_mask)
 			if(wear_mask.clothing_flags & BLOCK_GAS_SMOKE_EFFECT)
 				if(breath.toxins > safe_toxins_mask)
@@ -387,7 +387,7 @@
 					ratio = 0
 		if(ratio)
 			if(reagents)
-				reagents.add_reagent(PHORON, Clamp(ratio, MIN_PHORON_DAMAGE, MAX_PHORON_DAMAGE))
+				reagents.add_reagent(PLASMA, Clamp(ratio, MIN_PLASMA_DAMAGE, MAX_PLASMA_DAMAGE))
 			toxins_alert = max(toxins_alert, 1)
 	else
 		toxins_alert = 0
@@ -722,19 +722,19 @@
 
 	if(stat != DEAD)
 		if(src.eye_blind || blinded)
-			overlay_fullscreen("blind", /obj/screen/fullscreen/blind)
+			overlay_fullscreen("blind", /obj/abstract/screen/fullscreen/blind)
 		else
 			clear_fullscreen("blind")
 		if (src.disabilities & NEARSIGHTED)
-			overlay_fullscreen("impaired", /obj/screen/fullscreen/impaired, 2)
+			overlay_fullscreen("impaired", /obj/abstract/screen/fullscreen/impaired, 2)
 		else
 			clear_fullscreen("impaired")
 		if (src.eye_blurry)
-			overlay_fullscreen("blurry", /obj/screen/fullscreen/blurry)
+			overlay_fullscreen("blurry", /obj/abstract/screen/fullscreen/blurry)
 		else
 			clear_fullscreen("blurry")
 		if (src.druggy)
-			overlay_fullscreen("high", /obj/screen/fullscreen/high)
+			overlay_fullscreen("high", /obj/abstract/screen/fullscreen/high)
 		else
 			clear_fullscreen("high")
 

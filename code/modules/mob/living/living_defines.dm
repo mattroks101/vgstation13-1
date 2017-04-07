@@ -30,7 +30,7 @@
 
 	var/list/image/static_overlays
 
-	var/t_phoron = null
+	var/t_plasma = null
 	var/t_oxygen = null
 	var/t_sl_gas = null
 	var/t_n2 = null
@@ -68,7 +68,7 @@
 														//Set to null to prevent people from picking this mob up!
 	//
 	var/list/callOnLife = list() //
-	var/obj/screen/schematics_background
+	var/obj/abstract/screen/schematics_background
 	var/shown_schematics_background = 0
 
 	var/list/advanced_butchery //Includes a list of the tools used to butcher the mob, detectable via autopsy scanner rather than examine.

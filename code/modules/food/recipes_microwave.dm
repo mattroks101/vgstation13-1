@@ -1218,7 +1218,7 @@
 	reagents = list(FLOUR = 5)
 	items = list(
 		/obj/item/pipe,
-		/obj/item/stack/sheet/mineral/phoron,
+		/obj/item/stack/sheet/mineral/plasma,
 		)
 	result = /obj/item/weapon/reagent_containers/food/snacks/mommispaghetti
 
@@ -1958,7 +1958,7 @@
 	result = /obj/item/weapon/reagent_containers/food/snacks/risotto
 
 /datum/recipe/potentham
-	reagents = list(PHORON = 10)
+	reagents = list(PLASMA = 10)
 	items = list(
 
 		/obj/item/weapon/reagent_containers/food/snacks/meat/box,
@@ -2252,7 +2252,7 @@
 		/obj/item/weapon/reagent_containers/food/snacks/poutinebarrel,
 		/obj/item/weapon/reagent_containers/food/snacks/poutinebarrel
 		)
-	result = /obj/poutineocean
+	result = /obj/structure/poutineocean
 
 /datum/recipe/poutinecitadel
 	reagents = list (MAPLESYRUP = 50)
@@ -2263,5 +2263,5 @@
 		/obj/item/weapon/reagent_containers/food/snacks/poutinebarrel,
 		/obj/item/weapon/reagent_containers/food/snacks/poutinebarrel
 		)
-	result = /obj/poutineocean/poutinecitadel
+	result = /obj/structure/poutineocean/poutinecitadel
 

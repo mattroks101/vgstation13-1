@@ -30,12 +30,12 @@
 		var/mob/living/carbon/Ca = src
 		Ca.dropBorers(1)//sanity checking for borers that haven't been qdel'd yet
 	if(client)
-		for(var/obj/screen/movable/spell_master/spell_master in spell_masters)
+		for(var/obj/abstract/screen/movable/spell_master/spell_master in spell_masters)
 			returnToPool(spell_master)
 		spell_masters = null
 		remove_screen_objs()
 		for(var/atom/movable/AM in client.screen)
-			var/obj/screen/screenobj = AM
+			var/obj/abstract/screen/screenobj = AM
 			if(istype(screenobj))
 				if(!screenobj.globalscreen) //Screens taken care of in other places or used by multiple people
 					returnToPool(AM)
@@ -292,7 +292,7 @@
 	t += {"<span class='warning'> Temperature: [environment.temperature] \n</span>
 <span class='notice'> Nitrogen: [environment.nitrogen] \n</span>
 <span class='notice'> Oxygen: [environment.oxygen] \n</span>
-<span class='notice'> Phoron : [environment.toxins] \n</span>
+<span class='notice'> Plasma : [environment.toxins] \n</span>
 <span class='notice'> Carbon Dioxide: [environment.carbon_dioxide] \n</span>"}
 	for(var/datum/gas/trace_gas in environment.trace_gases)
 		to_chat(usr, "<span class='notice'> [trace_gas.type]: [trace_gas.moles] \n</span>")
@@ -417,7 +417,7 @@
 	if(timestopped)
 		return 0 //under effects of time magick
 	if(spell_masters && spell_masters.len)
-		for(var/obj/screen/movable/spell_master/spell_master in spell_masters)
+		for(var/obj/abstract/screen/movable/spell_master/spell_master in spell_masters)
 			spell_master.update_spells(0, src)
 	return
 
@@ -1302,14 +1302,16 @@ var/list/slot_equipment_priority = list( \
 /mob/proc/pull_damage()
 	if(ishuman(src))
 		var/mob/living/carbon/human/H = src
-		if(H.health - H.halloss <= config.health_threshold_softcrit)
-			for(var/name in H.organs_by_name)
-				var/datum/organ/external/e = H.organs_by_name[name]
-				if(H.lying)
-					if(((e.status & ORGAN_BROKEN && !(e.status & ORGAN_SPLINTED)) || e.status & ORGAN_BLEEDING) && (H.getBruteLoss() + H.getFireLoss() >= 100))
-						return 1
-						break
-		return 0
+		var/turf/TH = H.loc	
+		if (TH.has_gravity())
+			if(H.health - H.halloss <= config.health_threshold_softcrit)
+				for(var/name in H.organs_by_name)
+					var/datum/organ/external/e = H.organs_by_name[name]
+					if(H.lying)
+						if(((e.status & ORGAN_BROKEN && !(e.status & ORGAN_SPLINTED)) || e.status & ORGAN_BLEEDING) && (H.getBruteLoss() + H.getFireLoss() >= 100))
+							return 1
+							break
+			return 0
 
 /mob/MouseDrop(mob/M as mob)
 	..()
@@ -1781,7 +1783,7 @@ mob/proc/on_foot()
 /mob/proc/heard(var/mob/living/M)
 	return
 
-/mob/proc/AdjustPhoron()
+/mob/proc/AdjustPlasma()
 	return
 
 /mob/living/carbon/heard(var/mob/living/carbon/human/M)
@@ -1805,7 +1807,7 @@ mob/proc/on_foot()
 	var/init_blinded = blinded
 	var/init_eye_blind = eye_blind
 	var/init_deaf = ear_deaf
-	overlay_fullscreen("blind", /obj/screen/fullscreen/blind)
+	overlay_fullscreen("blind", /obj/abstract/screen/fullscreen/blind)
 	blinded = 1
 	eye_blind = 1
 	ear_deaf = 1

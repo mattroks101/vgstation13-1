@@ -83,7 +83,7 @@ var/list/spells = typesof(/spell) //needed for the badmin verb for now
 	var/hud_state = "" //name of the icon used in generating the spell hud object
 	var/override_base = ""
 
-	var/obj/screen/spell/connected_button
+	var/obj/abstract/screen/spell/connected_button
 	var/currently_channeled = 0
 	var/gradual_casting = FALSE //equals TRUE while a Sp_GRADUAL spell is actively being cast
 
@@ -261,8 +261,8 @@ var/list/spells = typesof(/spell) //needed for the badmin verb for now
 			target.AdjustKnockdown(amount)
 		if("paralysis")
 			target.AdjustParalysis(amount)
-		if("phoron")
-			target.AdjustPhoron(-amount)
+		if("plasma")
+			target.AdjustPlasma(-amount)
 		else
 			target.vars[varname] -= amount //I bear no responsibility for the runtimes that'll happen if you try to adjust non-numeric or even non-existant vars
 
