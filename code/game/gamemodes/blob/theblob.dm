@@ -213,7 +213,8 @@ var/list/blob_looks
 	update_icon()
 	return 0
 
-/obj/effect/blob/attackby(var/obj/item/weapon/W, var/mob/user)
+/obj/effect/blob/attackby(var/obj/item/weapon/W, var/mob/living/user)
+	user.do_attack_animation(src, W)
 	user.delayNextAttack(10)
 	playsound(get_turf(src), 'sound/effects/attackblob.ogg', 50, 1)
 	src.visible_message("<span class='warning'><B>The [src.name] has been attacked with \the [W][(user ? " by [user]." : ".")]</span>")
@@ -221,7 +222,7 @@ var/list/blob_looks
 	switch(W.damtype)
 		if("fire")
 			damage = (W.force / max(src.fire_resist,1))
-			if(istype(W, /obj/item/weapon/weldingtool) || istype(W, /obj/item/weapon/pickaxe/plasmacutter))
+			if(istype(W, /obj/item/weapon/weldingtool) || istype(W, /obj/item/weapon/pickaxe/phoroncutter))
 				playsound(get_turf(src), 'sound/effects/blobweld.ogg', 100, 1)
 		if("brute")
 			damage = (W.force / max(src.brute_resist,1))

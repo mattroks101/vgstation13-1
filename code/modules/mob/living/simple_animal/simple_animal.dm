@@ -44,7 +44,7 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 
 	var/show_stat_health = 1	//does the percentage health show in the stat panel for the mob
 
-	//Atmos effect - Yes, you can make creatures that require plasma or co2 to survive. N2O is a trace gas and handled separately, hence why it isn't here. It'd be hard to add it. Hard and me don't mix (Yes, yes make all the dick jokes you want with that.) - Errorage
+	//Atmos effect - Yes, you can make creatures that require phoron or co2 to survive. N2O is a trace gas and handled separately, hence why it isn't here. It'd be hard to add it. Hard and me don't mix (Yes, yes make all the dick jokes you want with that.) - Errorage
 	var/min_oxy = 5
 	var/max_oxy = 0					//Leaving something at 0 means it's off - has no maximum
 	var/min_tox = 0
@@ -421,11 +421,12 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 
 
 		else
-
+			L.do_attack_animation(src, L)
 			var/damage = rand(5, 10)
 			visible_message("<span class='danger'>[L] bites [src]!</span>")
 
 			if(stat != DEAD)
+				visible_message("<span class='danger'>[L] feeds on [src]!</span>", "<span class='notice'>You feed on [src]!</span>")
 				adjustBruteLoss(damage)
 				L.growth = min(L.growth + damage, LARVA_GROW_TIME)
 
@@ -475,6 +476,7 @@ var/global/list/animal_count = list() //Stores types, and amount of animals of t
 	else
 		user.delayNextAttack(8)
 		if(O.force)
+			user.do_attack_animation(src)
 			var/damage = O.force
 			if (O.damtype == HALLOSS)
 				damage = 0

@@ -172,11 +172,12 @@
 	src.add_hiddenprint(user)
 	return src.attack_hand(user)
 
-/obj/machinery/door/window/attack_paw(mob/user as mob)
+/obj/machinery/door/window/attack_paw(mob/living/user as mob)
 	if(istype(user, /mob/living/carbon/alien/humanoid) || istype(user, /mob/living/carbon/slime/adult))
 		if(src.operating)
 			return
 		user.delayNextAttack(8)
+		user.do_attack_animation(src, user)
 		src.health = max(0, src.health - 25)
 		playsound(get_turf(src), 'sound/effects/Glasshit.ogg', 75, 1)
 		visible_message("<span class='warning'>\The [user] smashes against \the [src.name].</span>", 1)
@@ -188,12 +189,13 @@
 		return src.attack_hand(user)
 
 
-/obj/machinery/door/window/attack_animal(mob/user as mob)
+/obj/machinery/door/window/attack_animal(mob/living/user as mob)
 	if(src.operating)
 		return
 	var/mob/living/simple_animal/M = user
 	if(M.melee_damage_upper <= 0)
 		return
+	user.do_attack_animation(src, user)
 	user.delayNextAttack(8)
 	src.health = max(0, src.health - M.melee_damage_upper)
 	playsound(get_turf(src), 'sound/effects/Glasshit.ogg', 75, 1)
@@ -207,7 +209,7 @@
 /obj/machinery/door/window/attack_hand(mob/user as mob)
 	return src.attackby(user, user)
 
-/obj/machinery/door/window/attackby(obj/item/weapon/I as obj, mob/user as mob)
+/obj/machinery/door/window/attackby(obj/item/weapon/I as obj, mob/living/user as mob)
 	// Make emagged/open doors able to be deconstructed
 	if (!src.density && src.operating != 1 && iscrowbar(I))
 		user.visible_message("[user] removes the electronics from the windoor assembly.", "You start to remove the electronics from the windoor assembly.")
@@ -226,6 +228,7 @@
 	//If it's a weapon, smash windoor. Unless it's an id card, agent card, ect.. then ignore it (Cards really shouldnt damage a door anyway)
 	if(src.density && istype(I, /obj/item/weapon) && !istype(I, /obj/item/weapon/card))
 		var/aforce = I.force
+		user.do_attack_animation(src, I)
 		user.delayNextAttack(8)
 		if(I.damtype == BRUTE || I.damtype == BURN)
 			src.health = max(0, src.health - aforce)
@@ -338,30 +341,30 @@
 	WA.update_icon()
 	return WA
 
-/obj/machinery/door/window/plasma
-	name = "Plasma Window Door"
-	desc = "A sliding glass door strengthened by plasma."
-	icon = 'icons/obj/doors/plasmawindoor.dmi'
+/obj/machinery/door/window/phoron
+	name = "Phoron Window Door"
+	desc = "A sliding glass door strengthened by phoron."
+	icon = 'icons/obj/doors/phoronwindoor.dmi'
 	health = 300
-	shard = /obj/item/weapon/shard/plasma
+	shard = /obj/item/weapon/shard/phoron
 	penetration_dampening = 6
 
-/obj/machinery/door/window/plasma/make_assembly(mob/user as mob)
+/obj/machinery/door/window/phoron/make_assembly(mob/user as mob)
 	// Windoor assembly
-	var/obj/structure/windoor_assembly/plasma/WA = new /obj/structure/windoor_assembly/plasma(src.loc)
+	var/obj/structure/windoor_assembly/phoron/WA = new /obj/structure/windoor_assembly/phoron(src.loc)
 	set_assembly(user, WA)
 	return WA
 
-/obj/machinery/door/window/plasma/secure
-	name = "Secure Plasma Window Door"
+/obj/machinery/door/window/phoron/secure
+	name = "Secure Phoron Window Door"
 	icon_state = "leftsecure"
 	base_state = "leftsecure"
 	health = 400
 	secure = 1
 	penetration_dampening = 8
 
-/obj/machinery/door/window/plasma/secure/make_assembly(mob/user as mob)
-	var/obj/structure/windoor_assembly/plasma/WA = ..(user)
+/obj/machinery/door/window/phoron/secure/make_assembly(mob/user as mob)
+	var/obj/structure/windoor_assembly/phoron/WA = ..(user)
 	WA.secure = "secure_"
 	WA.update_icon()
 	return WA

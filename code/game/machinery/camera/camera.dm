@@ -173,6 +173,7 @@ var/list/camera_names=list()
 		return
 	status = 0
 	update_icon()
+	user.do_attack_animation(src, user)
 	visible_message("<span class='warning'>\The [user] slashes at [src]!</span>")
 	playsound(get_turf(src), 'sound/weapons/slash.ogg', 100, 1)
 	add_hiddenprint(user)
@@ -212,9 +213,9 @@ var/list/camera_messages = list()
 			to_chat(user, "You can't reach into the camera's circuitry with the wires on the way.")
 			return*/
 		if (istype(W, /obj/item/stack))
-			var/obj/item/stack/sheet/mineral/plasma/s = W
+			var/obj/item/stack/sheet/mineral/phoron/s = W
 			s.use(1)
-			assembly.upgrades += new /obj/item/stack/sheet/mineral/plasma
+			assembly.upgrades += new /obj/item/stack/sheet/mineral/phoron
 		else
 			if(!user.drop_item(W, src))
 				return

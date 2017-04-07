@@ -1,7 +1,7 @@
 /*
 Ideas for the subtle effects of hallucination:
 
-Light up oxygen/plasma indicators (done)
+Light up oxygen/phoron indicators (done)
 Cause health to look critical/dead, even when standing (done)
 Characters silently watching you
 Brief flashes of fire/space/bombs/c4/dangerous shit (done)
@@ -330,7 +330,7 @@ mob/living/carbon/proc/handle_hallucinations()
 		mocktxt = ""
 
 		var/possible_txt = list("Launch Escape Pods","Self-Destruct Sequence","\[Swipe ID\]","De-Monkify",\
-		"Reticulate Splines","Plasma","Open Valve","Lockdown","Nerf Airflow","Kill Traitor","Nihilism",\
+		"Reticulate Splines","Phoron","Open Valve","Lockdown","Nerf Airflow","Kill Traitor","Nihilism",\
 		"OBJECTION!","Arrest Stephen Bowman","Engage Anti-Trenna Defenses","Increase Captain IQ","Retrieve Arms",\
 		"Play Charades","Oxygen","Inject BeAcOs","Ninja Lizards","Limit Break","Build Sentry")
 
@@ -383,8 +383,9 @@ proc/check_panel(mob/M)
 
 	var/health = 100
 
-/obj/effect/fake_attacker/attackby(var/obj/item/weapon/P as obj, mob/user as mob)
+/obj/effect/fake_attacker/attackby(var/obj/item/weapon/P as obj, mob/living/user as mob)
 	step_away(src,my_target,2)
+	user.do_attack_animation(src, P)
 	for(var/mob/M in oviewers(world.view,my_target))
 		to_chat(M, "<span class='danger'>[my_target] flails around wildly.</span>")
 	my_target.show_message("<span class='danger'>[src] has been attacked by [my_target] </span>", 1) //Lazy.

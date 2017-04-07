@@ -218,8 +218,8 @@
 			else if(prob(50))
 				new_item = new /obj/item/weapon/tank/anesthetic(src.loc)
 			else
-				new_item = new /obj/item/weapon/tank/plasma(src.loc)
-			icon_state = pick("oxygen","oxygen_fr","oxygen_f","plasma","anesthetic")
+				new_item = new /obj/item/weapon/tank/phoron(src.loc)
+			icon_state = pick("oxygen","oxygen_fr","oxygen_f","phoron","anesthetic")
 			additional_desc = "It [pick("gloops","sloshes")] slightly when you shake it."
 		if(ARCHAEO_TOOL)
 			item_type = "tool"
@@ -239,7 +239,7 @@
 			possible_spawns += /obj/item/stack/sheet/plasteel
 			possible_spawns += /obj/item/stack/sheet/glass/glass
 			possible_spawns += /obj/item/stack/sheet/glass/rglass
-			possible_spawns += /obj/item/stack/sheet/mineral/plasma
+			possible_spawns += /obj/item/stack/sheet/mineral/phoron
 			possible_spawns += /obj/item/stack/sheet/mineral/mythril
 			possible_spawns += /obj/item/stack/sheet/mineral/gold
 			possible_spawns += /obj/item/stack/sheet/mineral/silver
@@ -337,7 +337,7 @@
 			if(prob(50))
 				new_item = getFromPool(/obj/item/weapon/shard, loc)
 			else
-				new_item = getFromPool(/obj/item/weapon/shard/plasma, loc)
+				new_item = getFromPool(/obj/item/weapon/shard/phoron, loc)
 
 			apply_prefix = 0
 			apply_image_decorations = 0
@@ -376,7 +376,7 @@
 			/obj/item/weapon/gun/energy/xray,\
 			/obj/item/weapon/gun/energy/laser/captain,\
 			/obj/item/weapon/gun/energy/temperature,\
-			/obj/item/weapon/gun/energy/plasma,\
+			/obj/item/weapon/gun/energy/phoron,\
 			/obj/item/weapon/gun/energy/floragun,\
 			/obj/item/weapon/gun/energy/bison,\
 			/obj/item/weapon/gun/energy/taser)
@@ -386,11 +386,11 @@
 				new_item.icon = 'icons/obj/xenoarchaeology.dmi'
 				new_item.icon_state = "egun[rand(1,6)]"
 				new_item.item_state = new_item.icon_state
-				new_item.desc = "This is an antique energy weapon, you're not sure if it will fire or not."
+				additional_desc = "Looks like an antique energy weapon, you're not sure if it will fire or not."
 				new_item.inhand_states = list("left_hand" = 'icons/mob/in-hand/left/xenoarch.dmi', "right_hand" = 'icons/mob/in-hand/right/xenoarch.dmi')
 				if(prob(10)) // 10% chance to be a smart gun
 					new_item.can_take_pai = TRUE
-					new_item.desc += "There seems to be some sort of slot in the handle."
+					additional_desc += "There seems to be some sort of slot in the handle."
 				new_gun.charge_states = 0 //let's prevent it from losing that great icon if we charge it
 
 				//5% chance to explode when first fired
@@ -415,10 +415,10 @@
 			new_item.icon = 'icons/obj/xenoarchaeology.dmi'
 			new_item.item_state = new_item.icon_state
 			new_item.inhand_states = list("left_hand" = 'icons/mob/in-hand/left/xenoarch.dmi', "right_hand" = 'icons/mob/in-hand/right/xenoarch.dmi')
-			new_item.desc = "This is an antique projectile weapon, you're not sure if it will fire or not."
+			additional_desc = "Looks like an antique projectile weapon, you're not sure if it will fire or not."
 			if(prob(10)) // 10% chance to be a smart gun
 				new_item.can_take_pai = TRUE
-				new_item.desc += "There seems to be some sort of slot in the handle."
+				additional_desc += "There seems to be some sort of slot in the handle."
 
 			//let's get some ammunition in this gun : weighted to pick available ammo
 			new_gun.caliber = pick(50;list("357" = 1),
@@ -600,7 +600,7 @@
 		if(prob(30))
 			descriptors.Add("is encircled with bands of [pick("quadrinium","cordite","ferritic-alloy","plasteel","duranium")]")
 		if(prob(30))
-			descriptors.Add("menaces with spikes of [pick("solid plasma","uranium","white pearl","black steel")]")
+			descriptors.Add("menaces with spikes of [pick("solid phoron","uranium","white pearl","black steel")]")
 		if(descriptors.len > 0)
 			decorations = "It "
 			for(var/index=1, index <= descriptors.len, index++)

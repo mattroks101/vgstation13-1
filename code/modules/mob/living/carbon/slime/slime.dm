@@ -390,6 +390,7 @@
 
 		else
 
+			M.do_attack_animation(src, M)
 			var/damage = rand(1, 9)
 
 			attacked += 10
@@ -432,6 +433,7 @@
 			M.grab_mob(src)
 
 		if (I_DISARM)
+			M.do_attack_animation(src, M)
 			playsound(loc, 'sound/weapons/pierce.ogg', 25, 1, -1)
 			var/damage = 5
 			attacked += 10
@@ -1160,7 +1162,7 @@ mob/living/carbon/slime/var/temperature_resistance = T0C+75
 /obj/item/weapon/reagent_containers/food/snacks/egg/slime/process()
 	var/turf/location = get_turf(src)
 	var/datum/gas_mixture/environment = location.return_air()
-	if (environment.toxins > MOLES_PLASMA_VISIBLE)//plasma exposure causes the egg to hatch
+	if (environment.toxins > MOLES_PHORON_VISIBLE)//phoron exposure causes the egg to hatch
 		src.Hatch()
 
 /obj/item/weapon/reagent_containers/food/snacks/egg/slime/attackby(obj/item/weapon/W as obj, mob/user as mob)

@@ -292,7 +292,7 @@
 	t += {"<span class='warning'> Temperature: [environment.temperature] \n</span>
 <span class='notice'> Nitrogen: [environment.nitrogen] \n</span>
 <span class='notice'> Oxygen: [environment.oxygen] \n</span>
-<span class='notice'> Plasma : [environment.toxins] \n</span>
+<span class='notice'> Phoron : [environment.toxins] \n</span>
 <span class='notice'> Carbon Dioxide: [environment.carbon_dioxide] \n</span>"}
 	for(var/datum/gas/trace_gas in environment.trace_gases)
 		to_chat(usr, "<span class='notice'> [trace_gas.type]: [trace_gas.moles] \n</span>")
@@ -1781,7 +1781,7 @@ mob/proc/on_foot()
 /mob/proc/heard(var/mob/living/M)
 	return
 
-/mob/proc/AdjustPlasma()
+/mob/proc/AdjustPhoron()
 	return
 
 /mob/living/carbon/heard(var/mob/living/carbon/human/M)
@@ -1932,6 +1932,9 @@ mob/proc/on_foot()
 /spell/aoe_turf/revert_form/cast(var/list/targets, mob/user)
 	user.transmogrify()
 	user.remove_spell(src)
+
+/mob/attack_icon()
+	return image(icon = 'icons/mob/attackanims.dmi', icon_state = "default")
 
 #undef MOB_SPACEDRUGS_HALLUCINATING
 #undef MOB_MINDBREAKER_HALLUCINATING
