@@ -381,6 +381,15 @@
 	mymob.pullin.screen_loc = ui_pull_resist
 	src.hotkeybuttons += mymob.pullin
 
+	mymob.fov = getFromPool(/obj/abscract/screen)//Vision_cone
+	mymob.fov.icon = 'icons/mob/vision_cone.dmi'
+	mymob.fov.icon_state = "combat"
+	mymob.fov.name = " "
+	mymob.fov.screen_loc = "1,1"
+	mymob.fov.mouse_opacity = 0
+	mymob.fov.layer = HUD_BASE_LAYER
+	src.other += mymob.fov
+
 	mymob.pain = getFromPool(/obj/abstract/screen)
 
 	mymob.zone_sel = getFromPool(/obj/abstract/screen/zone_sel)
