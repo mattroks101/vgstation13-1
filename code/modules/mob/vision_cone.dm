@@ -14,7 +14,7 @@
 #define OPPOSITE_DIR(D) turn(D, 180)
 
 /mob
-	var/obj/screen/fov = null//The screen object because I can't figure out how the hell TG does their screen objects so I'm just using legacy code.
+	var/obj/abstract/screen/fov = null//The screen object because I can't figure out how the hell TG does their screen objects so I'm just using legacy code.
 
 client/
 	var/list/hidden_atoms = list()
