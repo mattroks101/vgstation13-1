@@ -416,8 +416,9 @@ var/area/space_area
 		CallHook("MobAreaChange", list("mob" = M, "new" = Obj.areaMaster, "old" = oldArea)) // /vg/ - EVENTS!
 		if(M.client && (M.client.prefs.toggles & SOUND_AMBIENCE) && isnull(M.areaMaster.media_source) && !M.client.ambience_playing)
 			M.client.ambience_playing = 1
-			M << sound('sound/ambience/shipambience.ogg', repeat = 1, wait = 0, volume = 35, channel = CHANNEL_AMBIENCE)
-			
+			if(!isspace(src) || !src.off_station)//So the hum isn't played when we're not on a place that would have a hum.
+				M << sound('sound/ambience/shipambience.ogg', repeat = 1, wait = 0, volume = 35, channel = CHANNEL_AMBIENCE)
+
 			var/sound = 'sound/ambience/ambigen1.ogg'//'sound/ambience/shipambience.ogg'
 
 			if(prob(35))
@@ -447,17 +448,12 @@ var/area/space_area
 				else
 					sound = pick('sound/ambience/ambigen1.ogg', 'sound/ambience/ambigen3.ogg', 'sound/ambience/ambigen4.ogg', 'sound/ambience/ambigen5.ogg', 'sound/ambience/ambigen6.ogg', 'sound/ambience/ambigen7.ogg', 'sound/ambience/ambigen8.ogg', 'sound/ambience/ambigen9.ogg', 'sound/ambience/ambigen10.ogg', 'sound/ambience/ambigen11.ogg', 'sound/ambience/ambigen12.ogg', 'sound/ambience/ambigen14.ogg')
 
-			//M << sound(sound, 0, 0, CHANNEL_AMBIENCE, 25)
-
 			if(!M.client.played)
 				M << sound(sound, repeat = 0, wait = 0, volume = 25, channel = 1)
 				M.client.played = 1
 			spawn(600)			//ewww - this is very very bad
 				if(M.&& M.client)
 					M.client.played = 0
-			//spawn(600) // Ewww - this is very very bad.
-			//	if(M && M.client)
-			//		M.client.ambience_playing = 0
 
 	if(turret_protected)
 		if(isliving(Obj))

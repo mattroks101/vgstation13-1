@@ -71,6 +71,7 @@ NOTE: there are two lists of areas in the end of this file: centcom and station 
 	var/holomap_color = null
 	var/holomap_marker = null
 	var/list/holomap_filter = list()
+	var/off_station = 0
 
 /*Adding a wizard area teleport list because motherfucking lag -- Urist*/
 /*I am far too lazy to make it a proper list of areas so I'll just make it run the usual telepot routine at the start of the game*/
@@ -547,6 +548,7 @@ proc/process_adminbus_teleport_locs()
 	icon_state = "asteroid"
 	requires_power = 0
 	shuttle_can_crush = FALSE
+	off_station = 1
 
 /area/asteroid/cave				// -- TLE
 	name = "\improper Asteroid - Underground"
@@ -2467,6 +2469,7 @@ var/list/the_station_areas = list (
 	requires_power = 0
 	var/sound/mysound = null
 	shuttle_can_crush = FALSE
+	off_station = 1
 
 /* We have a jukebox now, fuck that
 /area/beach/New()
