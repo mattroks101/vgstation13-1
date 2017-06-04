@@ -401,6 +401,18 @@
 		sethearing()
 	var/location = get_holder_at_turf_level(src) || get_turf(src)
 	for(var/mob/virtualhearer/hearer in viewers(location))
+		var/mob/M
+		if(istype(hearer.attached, /obj/machinery/hologram/holopad))
+			var/obj/machinery/hologram/holopad/holo = hearer.attached
+			if(holo.master)
+				M = holo.master
+		if(istype(hearer.attached, /mob))
+			M = hearer.attached
+		if(M)
+			if(M.client)
+				var/client/C = M.client
+				if(get_turf(src) in C.ObscuredTurfs)
+					continue
 		hearer.attached.on_see(message, blind_message, drugged_message, blind_drugged_message, src)
 
 /mob/proc/findname(msg)
@@ -644,6 +656,58 @@ var/list/slot_equipment_priority = list( \
 			openslot = 1
 			break
 	return openslot
+
+/mob/proc/unequip_everything()
+	var/list/unequipped_items = list()
+	for(var/slot in slot_equipment_priority)
+		var/obj/item/I = get_item_by_slot(slot)
+		if(I)
+			unequipped_items.Add(I)
+			u_equip(I)
+	return unequipped_items
+
+/mob/proc/recursive_list_equip(list/L)	//Used for equipping a list of items to a mob without worrying about the order (like needing to put a jumpsuit before a belt)
+	if(!L || !L.len)
+		return
+
+	for(var/obj/item/O in L)
+		O.forceMove(get_turf(src))	//At the very least, all the stuff should be on our tile
+
+	var/has_succeeded_once = TRUE
+	while(has_succeeded_once)
+		has_succeeded_once = FALSE
+		for(var/obj/item/I in L)
+			if(equip_to_appropriate_slot(I))
+				has_succeeded_once = TRUE
+				L.Remove(I)
+	if(L.len)
+		var/obj/item/weapon/storage/B = back
+		for(var/obj/item/I in L)
+			if(istype(B))
+				B.handle_item_insertion(I,1)
+	regenerate_icons()
+
+/mob/proc/equip_loadout(var/type, var/unequip_current = TRUE)	//Equips a loadout of the given type or, if no type is given, attempts to make a loadout from all the items on the proc caller's turf and equip that
+	if(type)
+		if(ispath(type, /obj/abstract/loadout))
+			new type(get_turf(src), src, unequip_current)
+	else
+		var/turf/T = get_turf(usr)
+		if(T)
+			if(unequip_current)
+				unequip_everything()	//unequip everything before equipping loadout
+			var/list/to_equip = list()
+			for(var/obj/item/I in T.contents)
+				to_equip.Add(new I.type(get_turf(src)))
+			recursive_list_equip(to_equip)
+			var/loadout_list = ""
+			for(var/obj/item/O in to_equip)
+				if(O == to_equip[to_equip.len])
+					loadout_list += "[O.type]"
+				else
+					loadout_list += "[O.type], "
+			log_admin("[key_name(src)] has been equipped with a custom loadout consisting of [loadout_list].")
+
 
 /obj/item/proc/mob_check_equip(M as mob, slot, disable_warning = 0)
 	if(!M)
