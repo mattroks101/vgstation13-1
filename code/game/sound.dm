@@ -65,7 +65,7 @@ var/list/machete_throw_hit_sound = list('sound/weapons/hfmachete_throw_hit01.ogg
 		vol = min( round( (vol) * atmos_modifier, 1 ), vol * 2) //upper range of twice the volume. Trust me, otherwise you get 10000 volume in a plasmafire
 		//message_admins("We've adjusted the sound of [source] at [turf_source.loc] to have a range of [7 + extrarange] and a volume of [vol]")
 
-	var/Dist = world.view + extrarange
+	var/Dist = (world.view + extrarange) * 2
 
 	// Looping through the player list has the added bonus of working for mobs inside containers
 	for (var/mob/player in player_list)
