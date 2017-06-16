@@ -45,3 +45,19 @@
 /obj/item/voucher/free_item/glowing/New()
 	..()
 	set_light(1.4,2,"#FFFF00")
+	
+/obj/item/voucher/free_item/glockammo
+	name = "ammo voucher"
+	desc = "Load up! Redeem at a SecTech for two magazines of criminal-stopping .380AUTO ammunition."
+	icon_state = "secvoucher"
+	freebies = list(/obj/item/ammo_storage/magazine/m380auto,/obj/item/ammo_storage/magazine/m380auto/rubber)
+	vend_amount = 2 
+	single_items = 1 
+	
+/obj/item/voucher/free_item/medical_safe
+	name = "medibot voucher"
+	desc = "Stay healthy! This voucher entitles you to a single (1) Nanotrasen Advanced Medibot! Redeem at a NanoMedPlus."
+	icon_state = "medvoucher"
+	freebies = list(/obj/item/weapon/medbot_cube)
+	vend_amount = 1
+	single_items = 1 

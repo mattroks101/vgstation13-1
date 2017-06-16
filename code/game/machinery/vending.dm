@@ -1287,6 +1287,9 @@ var/global/num_vending_terminals = 1
 	premium = list(
 		/obj/item/weapon/storage/pill_bottle/time_release = 2,
 		)
+	vouched = list(	
+		/obj/item/weapon/medbot_cube = 2
+		)
 
 	pack = /obj/structure/vendomatpack/medical
 
@@ -1559,6 +1562,10 @@ var/global/num_vending_terminals = 1
 		)
 	premium = list(
 		/obj/item/clothing/head/helmet/siren = 2
+		)
+	vouched = list(
+		/obj/item/ammo_storage/magazine/m380auto = 10,
+		/obj/item/ammo_storage/magazine/m380auto/rubber = 10
 		)
 
 	pack = /obj/structure/vendomatpack/security
