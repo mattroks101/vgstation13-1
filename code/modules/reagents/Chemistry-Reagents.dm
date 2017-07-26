@@ -2387,7 +2387,7 @@
 	var/has_had_heart_explode = 0 //We've applied permanent damage.
 	custom_metabolism = 0.04
 	var/oldspeed = 0
-	data = 1
+	data = 0
 
 /datum/reagent/hypozine/reagent_deleted()
 
@@ -2400,10 +2400,11 @@
 
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M
-		if(!has_been_hypozined || has_had_heart_explode)
+		if(!has_been_hypozined)
 			return
-		var/timedmg = ((120 SECONDS) - data) / 10
-		dehypozine(H, timedmg * 3, 1, 0)
+		var/timedmg = ((data - 60) / 2)
+		if (timedmg > 0)
+			dehypozine(H, timedmg, 1, 0)
 
 /datum/reagent/hypozine/on_mob_life(var/mob/living/M)
 
@@ -2456,7 +2457,7 @@
 			dehypozine(M)
 	data++
 
-/datum/reagent/hypozine/proc/dehypozine(var/mob/living/M, heartdamage = 100, override_remove = 0, explodeheart = 1)
+/datum/reagent/hypozine/proc/dehypozine(var/mob/living/M, heartdamage = 30, override_remove = 0, explodeheart = 1)
 	M.movement_speed_modifier -= oldspeed
 	if(has_been_hypozined && !has_had_heart_explode)
 		has_had_heart_explode = 1
@@ -2465,35 +2466,49 @@
 
 		if(ishuman(M))
 			var/mob/living/carbon/human/H = M
-			if(explodeheart)
-				if(H.get_heart())//Got a heart?
-					var/datum/organ/internal/heart/damagedheart = H.get_heart()
-					if (heartdamage >= 100)
-						if(H.species.name != "Diona" && damagedheart) //fuck dionae
-							to_chat(H, "<span class='danger'>You feel a terrible pain in your chest!</span>")
-							damagedheart.damage += 200 //Bye heart.
+
+			if(H.get_heart())//Got a heart?
+				var/datum/organ/internal/heart/damagedheart = H.get_heart()
+				if (heartdamage >= 30)
+					if(H.species.name != "Diona" && damagedheart) //fuck dionae
+						to_chat(H, "<span class='danger'>You feel a terrible pain in your chest!</span>")
+						damagedheart.damage += heartdamage //Bye heart.
+						if(explodeheart)
 							qdel(H.remove_internal_organ(H,damagedheart,H.get_organ(LIMB_CHEST)))
-							H.adjustOxyLoss(heartdamage)
-						else
-							to_chat(H, "<span class='danger'>The heat engulfs you!</span>")
-							for(var/datum/organ/external/E in H.organs)
-								E.droplimb(1, 1) //Bye limbs!
-								qdel(H.remove_internal_organ(H,damagedheart,H.get_organ(LIMB_CHEST))) //and heart!
-					else if (heartdamage < 100)
-						damagedheart.damage += heartdamage
-						H.adjustOxyLoss(heartdamage)
-				else//No heart?
-					to_chat(H, "<span class='danger'>The heat engulfs you!</span>")
-					if (heartdamage >= 100)
+						H.adjustOxyLoss(heartdamage*2)
+						H.adjustBruteLoss(heartdamage)
+					else
+						to_chat(H, "<span class='danger'>The heat engulfs you!</span>")
 						for(var/datum/organ/external/E in H.organs)
 							E.droplimb(1, 1) //Bye limbs!
-					else if (heartdamage < 100)
-						H.adjustBruteLoss(heartdamage / 2)
-						H.adjustFireLoss(heartdamage / 3)
-						H.adjustToxLoss(heartdamage / 8)
+							H.adjustFireLoss(heartdamage)
+							H.adjustBruteLoss(heartdamage)
+							H.adjustToxLoss(heartdamage)
+							if(explodeheart)
+								qdel(H.remove_internal_organ(H,damagedheart,H.get_organ(LIMB_CHEST))) //and heart!
+				else if (heartdamage < 30)
+					if(H.species.name != "Diona")
+						to_chat(H, "<span class='danger'>You feel a sharp pain in your chest!</span>")
+					else
+						to_chat(H, "<span class='danger'>The heat engulfs you!</span>")
+						H.adjustFireLoss(heartdamage)
+					damagedheart.damage += heartdamage
+					H.adjustToxLoss(heartdamage)
+					H.adjustBruteLoss(heartdamage)
+			else//No heart?
+				to_chat(H, "<span class='danger'>The heat engulfs you!</span>")
+				if (heartdamage >= 30)
+					for(var/datum/organ/external/E in H.organs)
+						E.droplimb(1, 1) //Bye limbs!
+						H.adjustBruteLoss(heartdamage)
+						H.adjustFireLoss(heartdamage)
+				else if (heartdamage < 30)
+					H.adjustBruteLoss(heartdamage)
+					H.adjustFireLoss(heartdamage)
+					H.adjustToxLoss(heartdamage)
 		else
 			M.gib()
-		data = 1
+		data = 0
 		oldspeed = 0
 
 /datum/reagent/cryoxadone
@@ -5790,3 +5805,137 @@ var/global/list/tonio_doesnt_remove=list("tonio", "blood")
 	id = THYMOL
 	description = "Thymol is used in the treatment of respiratory problems."
 	color = "#790D27" //rgb: 121, 13, 39
+
+//End of plant-specific reagents
+
+//Petritricin = cockatrice juice
+//Lore explanation for it affecting worn items (like hardsuits), but not items dropped on the ground that it was splashed over:
+//Pure petritricin can stonify any matter, organic or unorganic. However, if it's outside of a living organism, it rapidly deterogates
+//until it is only strong enough to affect organic matter.
+//When introduced to organic matter, petritricin converts living cells to produce more of itself, and the freshly produced substance
+//can affect items worn close enough to the body
+/datum/reagent/petritricin
+	name = "Petritricin"
+	id = PETRITRICIN
+	description = "Petritricin is a venom produced by cockatrices. The extraction process causes a major potency loss, but a right dose of this can still petrify somebody."
+	color = "#002000" //rgb: 0, 32, 0
+	dupeable = FALSE
+
+	var/minimal_dosage = 1 //At least 1 unit is needed for petriication
+
+/datum/reagent/petritricin/on_mob_life(var/mob/living/M)
+	if(..())
+		return 1
+
+	if(volume >= minimal_dosage && prob(30))
+		if(ishuman(M))
+			var/mob/living/carbon/human/H = M
+			if(locate(/datum/disease/petrification) in H.viruses)
+				return
+
+			var/datum/disease/D = new /datum/disease/petrification
+			D.holder = H
+			D.affected_mob = H
+			H.viruses += D
+		else if(!issilicon(M))
+			if(M.turn_into_statue(1)) //Statue forever
+				to_chat(M, "<span class='userdanger'>You have been turned to stone by ingesting petritricin.</span>")
+
+//A chemical for curing petrification. It only works after you've been fully petrified
+//Items on corpses will survive the process, but the corpses itself will be damaged and uncloneable after unstoning
+/datum/reagent/apetrine
+	name = "Apetrine"
+	id = APETRINE
+	description = "Apetrine is a chemical used to partially reverse the post-mortem effects of petritricin."
+	color = "#240080" //rgb: 36, 0, 128
+	dupeable = FALSE
+
+/datum/reagent/apetrine/reaction_obj(var/obj/O, var/volume)
+	if(..())
+		return 1
+
+	if(istype(O, /obj/structure/closet/statue))
+		var/obj/structure/closet/statue/statue = O
+
+		statue.dissolve()
+
+/datum/reagent/hemoscyanine
+	name = "Hemoscyanine"
+	id = HEMOSCYANINE
+	description = "Hemoscyanine is a toxin which can destroy blood cells."
+	reagent_state = LIQUID
+	color = "#600000" //rgb: 96, 0, 0
+
+/datum/reagent/hemoscyanine/on_mob_life(var/mob/living/M)
+	if(..())
+		return 1
+
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		if(!(H.species.anatomy_flags & NO_BLOOD))
+			H.vessel.remove_reagent(BLOOD, 2)
+
+/datum/reagent/anthracene
+	name = "Anthracene"
+	id = ANTHRACENE
+	description = "Anthracene is a fluorophore which emits a weak green glow."
+	reagent_state = LIQUID
+	color = "#00ff00" //rgb: 0, 255, 0
+	data = 0
+	var/light_intensity = 4
+	var/initial_color = null
+
+/datum/reagent/anthracene/on_mob_life(var/mob/living/M)
+	if(..())
+		return 1
+
+	if(!data)
+		initial_color = M.light_color
+		M.light_color = LIGHT_COLOR_GREEN
+		M.set_light(light_intensity)
+		data++
+
+/datum/reagent/anthracene/reagent_deleted()
+	if(..())
+		return 1
+
+	if(!holder)
+		return
+	var/atom/A =  holder.my_atom
+	A.light_color = initial_color
+	A.set_light(0)
+
+/datum/reagent/anthracene/reaction_mob(var/mob/living/M, var/method = TOUCH, var/volume)
+	if(..())
+		return 1
+
+	if(method == TOUCH)
+		var/init_color = M.light_color
+		M.light_color = LIGHT_COLOR_GREEN
+		M.set_light(light_intensity)
+		spawn(volume * 10)
+			M.light_color = init_color
+			M.set_light(0)
+
+/datum/reagent/anthracene/reaction_turf(var/turf/simulated/T, var/volume)
+	if(..())
+		return 1
+
+	var/init_color = T.light_color
+	T.light_color = LIGHT_COLOR_GREEN
+	T.set_light(light_intensity)
+	spawn(volume * 10)
+		T.light_color = init_color
+		T.set_light(0)
+
+/datum/reagent/anthracene/reaction_obj(var/obj/O, var/volume)
+	if(..())
+		return 1
+
+	var/init_color = O.light_color
+	O.light_color = LIGHT_COLOR_GREEN
+	O.set_light(light_intensity)
+	spawn(volume * 10)
+		O.light_color = init_color
+		O.set_light(0)
+

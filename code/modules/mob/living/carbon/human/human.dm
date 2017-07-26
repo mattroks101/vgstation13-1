@@ -75,6 +75,10 @@
 	h_style = "Bald"
 	..(new_loc, "Slime")
 
+/mob/living/carbon/human/NPC/New(var/new_loc, delay_ready_dna = 0)
+	..(new_loc)
+	initialize_basic_NPC_components()
+
 /mob/living/carbon/human/frankenstein/New(var/new_loc, delay_ready_dna = 0) //Just fuck my shit up: the mob
 	f_style = pick(facial_hair_styles_list)
 	h_style = pick(hair_styles_list)
@@ -1673,16 +1677,22 @@ mob/living/carbon/human/isincrit()
 	if (health - halloss <= config.health_threshold_softcrit)
 		return 1
 
-/mob/living/carbon/human/drag_damage()
+/mob/living/carbon/human/get_broken_organs()
 	var/mob/living/carbon/human/H = src
-	var/turf/TH = H.loc
 	var/list/return_organs = list()
-	if (TH.has_gravity() && H.lying)
-		for(var/datum/organ/external/damagedorgan in H.organs)
-			if(damagedorgan.status & ORGAN_BROKEN && !(damagedorgan.status & ORGAN_SPLINTED) || damagedorgan.status & ORGAN_BLEEDING)
-				return_organs += damagedorgan
-		return return_organs
+	for(var/datum/organ/external/damagedorgan in H.organs)
+		if(damagedorgan.status & ORGAN_BROKEN && !(damagedorgan.status & ORGAN_SPLINTED))
+			return_organs += damagedorgan
+	return return_organs
 
+/mob/living/carbon/human/get_bleeding_organs()
+	var/mob/living/carbon/human/H = src
+	var/list/return_organs = list()
+	for(var/datum/organ/external/damagedorgan in H.organs)
+		if(damagedorgan.status & ORGAN_BLEEDING)
+			return_organs += damagedorgan
+	return return_organs		
+		
 /mob/living/carbon/human/get_heart()
 	return internal_organs_by_name["heart"]
 
@@ -1817,3 +1827,15 @@ mob/living/carbon/human/remove_internal_organ(var/mob/living/user, var/datum/org
 	if(M_HULK in mutations)
 		return image(icon = 'icons/mob/attackanims.dmi', icon_state = "hulk")
 	else return image(icon = 'icons/mob/attackanims.dmi', icon_state = "default")
+
+/mob/living/carbon/human/proc/initialize_barebones_NPC_components()	//doesn't actually do anything, but contains tools needed for other types to do things
+	NPC_brain = new (src)
+	NPC_brain.AddComponent(/datum/component/controller/mob)
+	NPC_brain.AddComponent(/datum/component/ai/hand_control)
+
+/mob/living/carbon/human/proc/initialize_basic_NPC_components()	//will wander around
+	initialize_barebones_NPC_components()
+	NPC_brain.AddComponent(/datum/component/ai/human_brain)
+	NPC_brain.AddComponent(/datum/component/ai/target_finder/human)
+	NPC_brain.AddComponent(/datum/component/ai/target_holder/prioritizing)
+	NPC_brain.AddComponent(/datum/component/ai/melee/attack_human)
