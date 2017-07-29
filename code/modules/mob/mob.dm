@@ -1904,7 +1904,6 @@ mob/proc/on_foot()
 		"lying_prev",
 		"canmove",
 		"candrop",
-		"lastpuke",
 		"cpr_time",
 		"bodytemperature",
 		"drowsyness",
