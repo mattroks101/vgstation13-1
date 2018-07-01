@@ -18,6 +18,25 @@
 	..()
 	handle_layer()
 
+/obj/structure/bed/chair/lock_atom(var/atom/movable/AM)
+	. = ..()
+	update_icon()
+
+/obj/structure/bed/chair/unlock_atom(var/atom/movable/AM)
+	. = ..()
+	update_icon()
+
+/obj/structure/bed/chair/update_icon()
+	..()
+	if(is_locking(lock_type))
+		overlays += buckle_overlay
+		overlays += secondary_buckle_overlay
+	else
+		overlays -= buckle_overlay
+		overlays -= secondary_buckle_overlay
+
+	handle_layer() 				         // part of layer fix
+
 /obj/structure/bed/chair/can_spook()
 	. = ..()
 	if(.)
@@ -78,6 +97,13 @@
 
 	spin()
 
+/obj/structure/bed/chair/relayface(var/mob/living/user, direction) //ALSO for vehicles!
+	if(!config.ghost_interaction || !can_spook())
+		if(user.isUnconscious() || user.restrained())
+			return
+	change_dir(direction)
+	return 1
+
 /obj/structure/bed/chair/MouseDrop_T(mob/M as mob, mob/user as mob)
 	if(!istype(M))
 		return
@@ -119,6 +145,23 @@
 	name = "wooden chair"
 	desc = "Old is never too old to not be in fashion."
 
+/obj/structure/bed/chair/wood/pew
+	name = "pew"
+	desc = "Uncomfortable."
+	sheet_amt = 2
+	anchored = 1
+	noghostspin = 1
+
+/obj/structure/bed/chair/wood/pew/left
+	icon_state = "bench_left"
+
+/obj/structure/bed/chair/wood/pew/right/
+	icon_state = "bench_right"
+
+/obj/structure/bed/chair/wood/pew/mid/ // mid refers to a straight couch part
+	icon_state = "bench_mid"
+
+
 /obj/structure/bed/chair/wood/wings
 	icon_state = "wooden_chair_wings"
 	name = "wooden chair"
@@ -126,6 +169,26 @@
 
 /obj/structure/bed/chair/wood/wings/cultify()
 	return
+
+/obj/structure/bed/chair/wood/throne
+	icon = 'icons/obj/stationobjs_64x64.dmi'
+	icon_state = "throne"
+	name = "throne"
+	desc = "A throne fitting for a royal behind."
+	sheet_amt = 40
+	anchored = 1
+	pixel_x = -1*WORLD_ICON_SIZE/2
+	pixel_y = -1*WORLD_ICON_SIZE/2
+
+/obj/structure/bed/chair/wood/throne/cultify()
+	icon_state = "skullthrone"
+	name = "skull throne"
+	desc = pick("Put Khorny pun here.","Well, now what?","Now all that is required is a goblet made from your 'other' enemies' skulls.")
+
+/obj/structure/bed/chair/wood/throne/New()
+	..()
+	buckle_overlay = image("icons/obj/stools-chairs-beds.dmi", "[icon_state]_arm", CHAIR_ARMREST_LAYER)
+	buckle_overlay.plane = ABOVE_HUMAN_PLANE
 
 /obj/structure/bed/chair/holowood/normal
 	icon_state = "wooden_chair"
@@ -156,24 +219,6 @@
 	buckle_overlay = image("icons/obj/objects.dmi", "[icon_state]_armrest", CHAIR_ARMREST_LAYER)
 	buckle_overlay.plane = ABOVE_HUMAN_PLANE
 
-/obj/structure/bed/chair/comfy/lock_atom(var/atom/movable/AM)
-	..()
-	update_icon()
-
-/obj/structure/bed/chair/comfy/unlock_atom(var/atom/movable/AM)
-	..()
-	update_icon()
-
-/obj/structure/bed/chair/comfy/update_icon()
-	..()
-	if(is_locking(lock_type))
-		overlays += buckle_overlay
-		if(secondary_buckle_overlay)
-			overlays += secondary_buckle_overlay
-	else
-		overlays -= buckle_overlay
-		if(secondary_buckle_overlay)
-			overlays -= secondary_buckle_overlay
 
 /obj/structure/bed/chair/comfy/attackby(var/obj/item/W, var/mob/user)
 	if (iswrench(W))
@@ -194,13 +239,13 @@
 
 	return ..()
 
-/obj/structure/bed/chair/comfy/attack_hand(var/mob/user)
+/obj/structure/bed/chair/comfy/attack_hand(var/mob/user, params, proximity)
 	if(is_locking(lock_type))
 		return ..()
-
-	for (var/obj/item/I in src)
-		user.put_in_hands(I)
-		to_chat(user, "You pull out \the [I] between \the [src]'s cushions.")
+	if(proximity)
+		for (var/obj/item/I in src)
+			user.put_in_hands(I)
+			to_chat(user, "You pull out \the [I] between \the [src]'s cushions.")
 
 /obj/structure/bed/chair/comfy/brown
 	icon_state = "comfychair_brown"
@@ -230,23 +275,6 @@
 	buckle_overlay = image("icons/obj/objects.dmi", "[icon_state]-overlay", CHAIR_ARMREST_LAYER)
 	buckle_overlay.plane = ABOVE_HUMAN_PLANE
 
-/obj/structure/bed/chair/office/lock_atom(var/atom/movable/AM)
-	. = ..()
-	update_icon()
-
-/obj/structure/bed/chair/office/unlock_atom(var/atom/movable/AM)
-	..()
-	update_icon()
-
-/obj/structure/bed/chair/office/update_icon()
-	..()
-	if(is_locking(lock_type))
-		overlays += buckle_overlay
-	else
-		overlays -= buckle_overlay
-
-	handle_layer() 				         // part of layer fix
-
 
 /obj/structure/bed/chair/office/handle_layer() // Fixes layer problem when and office chair is buckled and facing north
 	if(dir == NORTH && !is_locking(lock_type))
@@ -256,7 +284,45 @@
 		layer = OBJ_LAYER
 		plane = OBJ_PLANE
 
+/obj/structure/bed/chair/office/relaymove(var/mob/living/user, direction)
+	if(user.incapacitated() || !user.has_limbs)
+		return 0
+	//If we're in space or our area has no gravity...
+	var/turf/T = get_turf(loc)
+	if(!T)
+		return 0
+	if(!T.has_gravity())
+		// Block relaymove() if needed.
+		if(!Process_Spacemove(0))
+			return 0
+	if(last_airflow + 5 SECONDS > world.time) //ugly hack: can't scoot during ZAS
+		return 0
 
+	if(istype(T, /turf/simulated))
+		var/turf/simulated/TS = T
+		var/obj/effect/overlay/puddle/P = TS.is_wet()
+		if(P && P.wet == TURF_WET_LUBE)
+			user.unlock_from(src)
+			T.Entered(user) //bye bye
+			return 0
+
+	//forwards, scoot slow
+	if(direction == dir)
+		var/scootdelay = user.movement_delay()*6
+		set_glide_size(DELAY2GLIDESIZE(scootdelay))
+		step(src, direction)
+		user.delayNextMove(scootdelay)
+	//backwards, scoot fast
+	else if(direction == turn(dir, 180))
+		var/scootdelay = user.movement_delay()*3
+		set_glide_size(DELAY2GLIDESIZE(scootdelay))
+		step(src, direction)
+		change_dir(turn(direction, 180)) //face away from where we're going
+		user.delayNextMove(scootdelay)
+	//sideways, swivel to face
+	else
+		change_dir(direction)
+		user.delayNextMove(1)
 
 /obj/structure/bed/chair/office/light
 	icon_state = "officechair_white"
@@ -462,7 +528,7 @@
 /obj/structure/bed/chair/folding/MouseDrop(over_object, src_location, over_location)
 	..()
 	if(over_object == usr && Adjacent(usr))
-		if(!ishuman(usr) || usr.incapacitated() || usr.lying)
+		if(!ishigherbeing(usr) || usr.incapacitated() || usr.lying)
 			return
 
 		if(is_locking(lock_type))

@@ -147,7 +147,7 @@
 			icon_state = "straight_cut2"
 		if(LARGE_HOLE)
 			icon_state = "straight_cut3"
-			density = 0
+			setDensity(FALSE)
 
 /obj/structure/fence/Bumped(atom/user)
 	if(ismob(user))
@@ -177,9 +177,7 @@
 	var/obj/structure/cable/C = T.get_cable_node()
 	if(C)
 		if(electrocute_mob(user, C, src))
-			var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
-			s.set_up(3, 1, src)
-			s.start()
+			spark(src)
 			return 1
 		else
 			return 0
@@ -224,10 +222,10 @@
 /obj/structure/fence/door/proc/update_door_status()
 	switch(open)
 		if(FALSE)
-			density = 1
+			setDensity(TRUE)
 			icon_state = "door_closed"
 		if(TRUE)
-			density = 0
+			setDensity(FALSE)
 			icon_state = "door_opened"
 
 /obj/structure/fence/door/proc/can_open(mob/user)

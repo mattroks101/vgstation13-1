@@ -17,7 +17,6 @@ var/list/plating_icons = list("plating","platingdmg1","platingdmg2","platingdmg3
 				"ironsand8", "ironsand9", "ironsand10", "ironsand11",
 				"ironsand12", "ironsand13", "ironsand14", "ironsand15")
 var/list/wood_icons = list("wood","wood-broken")
-var/image/list/w_overlays = list("wet" = image('icons/effects/water.dmi',icon_state = "wet_floor"))
 /turf/simulated/floor
 
 	//Note to coders, the 'intact' var can no longer be used to determine if the floor is a plating or not.
@@ -40,7 +39,7 @@ var/image/list/w_overlays = list("wet" = image('icons/effects/water.dmi',icon_st
 
 	melt_temperature = 1643.15 // Melting point of steel
 
-	plane = TURF_PLANE
+	plane = FLOOR_PLANE
 
 /turf/simulated/floor/New()
 	..()
@@ -123,6 +122,7 @@ turf/simulated/floor/update_icon()
 		else
 			set_light(0)
 			icon_state = "light_off"
+			overlays -= floor_overlay //Removes overlay when off without removing other overlays.
 	else if(is_grass_floor())
 		if(!broken && !burnt)
 			if(!(icon_state in list("grass1","grass2","grass3","grass4")))
@@ -360,9 +360,6 @@ turf/simulated/floor/update_icon()
 					if(istype(get_step(src,direction),/turf/simulated/floor))
 						var/turf/simulated/floor/FF = get_step(src,direction)
 						FF.update_icon() //so siding get updated properly
-	else if(is_light_floor())
-		//Remove the light tile overlay
-		overlays.Cut()
 
 	if(floor_tile)
 		//qdel(floor_tile)
@@ -526,6 +523,13 @@ turf/simulated/floor/update_icon()
 		else
 			if(is_wood_floor())
 				to_chat(user, "<span class='warning'>You forcefully pry off the planks, destroying them in the process.</span>")
+			else if(is_light_floor())
+				to_chat(user, "<span class='notice'>You remove the light floor.</span>")
+				var/obj/item/stack/tile/light/T = floor_tile
+				floor_overlay = T.get_turf_image()
+				overlays -= floor_overlay // This removes the light floor overlay, but not other floor overlays.
+				floor_tile.forceMove(src)
+				floor_tile = null
 			else
 				to_chat(user, "<span class='notice'>You remove the [floor_tile.name].</span>")
 				floor_tile.forceMove(src)
@@ -635,7 +639,7 @@ turf/simulated/floor/update_icon()
 				else
 					to_chat(user, "<span class='notice'>You need more welding fuel to complete this task.</span>")
 
-/turf/simulated/floor/Enter(mob/AM)
+/turf/simulated/floor/Entered(var/atom/movable/AM)
 	.=..()
 
 	if(AM && istype(AM,/mob/living))
@@ -660,27 +664,25 @@ turf/simulated/floor/update_icon()
 						spam_flag = 0
 						update_icon()
 
+
+/turf/simulated/proc/is_wet() //Returns null if no puddle, otherwise returns the puddle
+	return locate(/obj/effect/overlay/puddle) in src
+
 /turf/simulated/proc/wet(delay = 800, slipperiness = TURF_WET_WATER)
-	if(wet >= slipperiness)
-		return
-	wet = slipperiness
-	if(wet_overlay)
-		overlays -= wet_overlay
-		wet_overlay = null
-	wet_overlay = w_overlays["wet"]
-	overlays += wet_overlay
-	spawn(delay)
-		if(!istype(src, /turf/simulated)) //Because turfs don't get deleted, they change, adapt, transform, evolve and deform. they are one and they are all.
-			return
-		dry(slipperiness)
+	var/obj/effect/overlay/puddle/P = is_wet()
+	if(P)
+		if(slipperiness > P.wet)
+			P.wet = slipperiness
+			P.lifespan = max(world.time + delay, world.time+P.lifespan)
+	else
+		new /obj/effect/overlay/puddle(src, slipperiness, delay)
 
 /turf/simulated/proc/dry(slipperiness = TURF_WET_WATER)
-	if(wet > slipperiness)
+	var/obj/effect/overlay/puddle/P = is_wet()
+	if(P.wet > slipperiness)
 		return
-	wet = TURF_DRY
-	if(wet_overlay)
-		overlays -= wet_overlay
-		wet_overlay = null
+	qdel(P)
+
 
 /turf/simulated/floor/attack_construct(mob/user as mob)
 	if(istype(src,/turf/simulated/floor/carpet))

@@ -8,6 +8,7 @@
 	allowed = list(/obj/item/device/flashlight)
 	light_power = 1.7
 	var/brightness_on = 4 //Luminosity when on. If modified, do NOT run update_brightness() directly
+	var/color_on = null //Color when on.
 	var/on = 0 //Remember to run update_brightness() when modified, otherwise disasters happen
 	var/no_light = 0 //Disables the helmet light when set to 1. Make sure to run check_light() if this is updated
 	_color = "engineering" //Determines used sprites: rig[on]-[_color]. Use update_icon() directly to update the sprite. NEEDS TO BE SET CORRECTLY FOR HELMETS
@@ -19,9 +20,8 @@
 	species_restricted = list("exclude",VOX_SHAPED)
 
 /obj/item/clothing/head/helmet/space/rig/New()
+	check_light() //Needed to properly handle helmets with no lights
 	..()
-	//Needed to properly handle helmets with no lights
-	check_light()
 	//Useful for helmets with special starting conditions (namely, starts lit)
 	update_brightness()
 	update_icon()
@@ -50,7 +50,7 @@
 
 
 	if(on)
-		set_light(brightness_on)
+		set_light(brightness_on,0,color_on)
 	else
 		set_light(0)
 	update_icon()
@@ -133,7 +133,7 @@
 //Syndicate rig
 /obj/item/clothing/head/helmet/space/rig/syndi
 	name = "blood-red hardsuit helmet"
-	desc = "An advanced helmet designed for work in special operations. Property of Gorlex Marauders."
+	desc = "An advanced helmet designed for work in special operations. A tag on it says \"Property of Gorlex Marauders\"."
 	icon_state = "rig0-syndi"
 	item_state = "syndie_helm"
 	species_fit = list(VOX_SHAPED, GREY_SHAPED)
@@ -151,7 +151,7 @@
 		..(user)
 	else
 		camera = new /obj/machinery/camera(src)
-		camera.network = list("NUKE")
+		camera.network = list(CAMERANET_NUKE)
 		cameranet.removeCamera(camera)
 		camera.c_tag = user.name
 		to_chat(user, "<span class='notice'>User scanned as [camera.c_tag]. Camera activated.</span>")
@@ -168,7 +168,6 @@
 	item_state = "syndie_hardsuit"
 	species_fit = list(GREY_SHAPED)
 	species_fit = list(VOX_SHAPED)
-	slowdown = HARDSUIT_SLOWDOWN_LOW
 	w_class = W_CLASS_MEDIUM
 	armor = list(melee = 60, bullet = 50, laser = 30, energy = 15, bomb = 35, bio = 100, rad = 60)
 	allowed = list(/obj/item/device/flashlight,/obj/item/weapon/tank,/obj/item/weapon/gun,/obj/item/ammo_storage,/obj/item/ammo_casing,/obj/item/weapon/melee/baton,/obj/item/weapon/melee/energy/sword,/obj/item/weapon/handcuffs)
@@ -176,6 +175,35 @@
 	pressure_resistance = 40 * ONE_ATMOSPHERE
 
 	species_restricted = null
+
+//Elite Strike Team rig
+/obj/item/clothing/head/helmet/space/rig/syndicate_elite
+	name = "syndicate elite hardsuit helmet"
+	desc = "The result of reverse-engineered deathsquad technology combined with nuclear operative hardsuit."
+	icon_state = "rig0-syndicate_elite"
+	item_state = "syndicate-helm-black"
+	_color = "syndicate_elite"
+	armor = list(melee = 62, bullet = 52, laser = 32,energy = 17, bomb = 37, bio = 100, rad = 60)
+	max_heat_protection_temperature = FIRE_HELMET_MAX_HEAT_PROTECTION_TEMPERATURE
+	siemens_coefficient = 0.4
+	clothing_flags = PLASMAGUARD
+
+	species_restricted = null
+
+/obj/item/clothing/suit/space/rig/syndicate_elite
+	icon_state = "rig-syndicate_elite"
+	name = "syndicate elite hardsuit"
+	desc = "The result of reverse-engineered deathsquad technology combined with nuclear operative hardsuit."
+	item_state = "syndicate-black"
+	w_class = W_CLASS_MEDIUM
+	armor = list(melee = 70, bullet = 55, laser = 40, energy = 20, bomb = 47, bio = 100, rad = 60)
+	allowed = list(/obj/item/weapon/gun/osipr,/obj/item/device/flashlight,/obj/item/weapon/tank,/obj/item/weapon/gun,/obj/item/ammo_storage,/obj/item/ammo_casing,/obj/item/weapon/melee/baton,/obj/item/weapon/melee/energy/sword,/obj/item/weapon/handcuffs)
+	siemens_coefficient = 0.5
+	max_heat_protection_temperature = FIRESUIT_MAX_HEAT_PROTECTION_TEMPERATURE
+	clothing_flags = PLASMAGUARD
+
+	species_restricted = null
+
 
 //Wizard Rig
 /obj/item/clothing/head/helmet/space/rig/wizard
@@ -201,7 +229,6 @@
 	name = "gem-encrusted hardsuit"
 	desc = "A bizarre gem-encrusted suit that radiates magical energies."
 	item_state = "wiz_hardsuit"
-	slowdown = HARDSUIT_SLOWDOWN_LOW
 	w_class = W_CLASS_MEDIUM
 	species_fit = list(GREY_SHAPED)
 	species_restricted = list("exclude",VOX_SHAPED)
@@ -233,7 +260,7 @@
 	item_state = "medical_hardsuit"
 	species_fit = list(GREY_SHAPED)
 	species_restricted = list("exclude",VOX_SHAPED)
-	allowed = list(/obj/item/device/flashlight,/obj/item/weapon/tank,/obj/item/weapon/storage/firstaid,/obj/item/device/healthanalyzer,/obj/item/stack/medical)
+	allowed = list(/obj/item/device/flashlight,/obj/item/weapon/tank,/obj/item/weapon/storage/firstaid,/obj/item/device/healthanalyzer,/obj/item/stack/medical, /obj/item/roller)
 	pressure_resistance = 40 * ONE_ATMOSPHERE
 
 
@@ -258,7 +285,16 @@
 	species_fit = list(GREY_SHAPED)
 	species_restricted = list("exclude",VOX_SHAPED)
 	armor = list(melee = 60, bullet = 10, laser = 30, energy = 5, bomb = 45, bio = 100, rad = 10)
-	allowed = list(/obj/item/weapon/gun,/obj/item/device/flashlight,/obj/item/weapon/tank,/obj/item/weapon/melee/baton)
+	allowed = list(
+		/obj/item/weapon/gun,
+		/obj/item/device/flashlight,
+		/obj/item/weapon/tank,
+		/obj/item/weapon/melee/baton,
+		/obj/item/weapon/reagent_containers/spray/pepper,
+		/obj/item/ammo_storage,
+		/obj/item/ammo_casing,
+		/obj/item/weapon/handcuffs,
+		/obj/item/weapon/bikehorn/baton)
 	siemens_coefficient = 0.7
 	pressure_resistance = 40 * ONE_ATMOSPHERE
 
@@ -336,13 +372,13 @@
 	armor = list(melee = 40, bullet = 30, laser = 30, energy = 15, bomb = 35, bio = 100, rad = 20)
 	_color = "nazi"
 	pressure_resistance = 40 * ONE_ATMOSPHERE
+	color_on = "#FF2222"
 
 /obj/item/clothing/suit/space/rig/nazi
 	name = "nazi hardsuit"
 	desc = "The attire of a true krieger. All shall fall, and only das vaterland will remain."
 	item_state = "rig-nazi"
 	icon_state = "rig-nazi"
-	slowdown = HARDSUIT_SLOWDOWN_LOW
 	species_fit = list(GREY_SHAPED)
 	species_restricted = list("exclude",VOX_SHAPED)//GAS THE VOX
 	armor = list(melee = 40, bullet = 30, laser = 30, energy = 15, bomb = 35, bio = 100, rad = 20)
@@ -419,7 +455,6 @@
 	desc = "A well polished set of armour belonging to a Space-Knight. Maidens Rescued in Space: 100, Maidens who have slept with me in Space: 0."
 	icon_state = "rig-knight"
 	item_state = "rig-knight"
-	slowdown = HARDSUIT_SLOWDOWN_LOW
 	allowed = list(/obj/item/weapon/gun,/obj/item/weapon/melee/baton,/obj/item/weapon/tank,/obj/item/weapon/shield/energy,/obj/item/weapon/claymore)
 	armor = list(melee = 60, bullet = 40, laser = 40,energy = 30, bomb = 50, bio = 100, rad = 60)
 	max_heat_protection_temperature = FIRESUIT_MAX_HEAT_PROTECTION_TEMPERATURE

@@ -376,12 +376,16 @@
 	..()
 	new /obj/item/clothing/suit/radiation(src)
 	new /obj/item/clothing/head/radiation(src)
+	new /obj/item/device/geiger_counter(src)
 	new /obj/item/clothing/suit/radiation(src)
 	new /obj/item/clothing/head/radiation(src)
+	new /obj/item/device/geiger_counter(src)
 	new /obj/item/clothing/suit/radiation(src)
 	new /obj/item/clothing/head/radiation(src)
+	new /obj/item/device/geiger_counter(src)
 	new /obj/item/clothing/suit/radiation(src)
 	new /obj/item/clothing/head/radiation(src)
+	new /obj/item/device/geiger_counter(src)
 
 /obj/structure/closet/Cross(atom/movable/mover, turf/target, height=1.5, air_group = 0)
 	if(air_group || (height==0 || wall_mounted))
@@ -401,7 +405,7 @@
 
 	icon_state = icon_opened
 	src.opened = 1
-	src.density = 0
+	setDensity(FALSE)
 	return 1
 
 /obj/structure/closet/crate/close()
@@ -415,7 +419,7 @@
 
 	icon_state = icon_closed
 	src.opened = 0
-	src.density = 1
+	src.setDensity(TRUE)
 	return 1
 
 /obj/structure/closet/crate/insert(var/atom/movable/AM, var/include_mobs = 0)
@@ -451,9 +455,7 @@
 			if(isliving(user))
 				var/mob/living/L = user
 				if(L.electrocute_act(17, src))
-					//var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
-					//s.set_up(5, 1, src)
-					//s.start()
+					//spark(src, 5)
 					return
 		open()
 	return

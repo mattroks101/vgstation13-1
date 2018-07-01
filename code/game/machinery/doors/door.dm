@@ -262,7 +262,7 @@ var/list/all_doors = list()
 	if (makes_noise)
 		playsound(get_turf(src), soundeffect, soundpitch, 1)
 
-	density = 1
+	setDensity(TRUE)
 	door_animate("closing")
 	sleep(animation_delay)
 	update_icon()
@@ -309,7 +309,7 @@ var/list/all_doors = list()
 /obj/machinery/door/cultify()
 	if(invisibility != INVISIBILITY_MAXIMUM)
 		invisibility = INVISIBILITY_MAXIMUM
-		density = 0
+		setDensity(FALSE)
 		anim(target = src, a_icon = 'icons/effects/effects.dmi', a_icon_state = "breakdoor", sleeptime = 10)
 		qdel(src)
 
@@ -357,16 +357,14 @@ var/list/all_doors = list()
 				qdel(src)
 		if(3.0)
 			if(prob(80))
-				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
-				s.set_up(2, 1, src)
-				s.start()
+				spark(src, 2)
 	return
 
 /obj/machinery/door/proc/requiresID()
 	return 1
 
 /obj/machinery/door/proc/update_nearby_tiles(var/turf/T)
-	if(!air_master)
+	if(!SS_READY(SSair))
 		return 0
 
 	if(!T)
@@ -375,7 +373,7 @@ var/list/all_doors = list()
 		return 0
 
 	update_heat_protection(T)
-	air_master.mark_for_update(T)
+	SSair.mark_for_update(T)
 
 	update_freelok_sight()
 	return 1
@@ -393,7 +391,7 @@ var/list/all_doors = list()
 		else
 			source.thermal_conductivity = initial(source.thermal_conductivity)
 
-/obj/machinery/door/Move(new_loc, new_dir)
+/obj/machinery/door/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0, glide_size_override = 0)
 	update_nearby_tiles()
 	. = ..()
 	if(width > 1)

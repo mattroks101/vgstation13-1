@@ -75,7 +75,7 @@
 			O.status |= ORGAN_CUT_AWAY
 			user.attack_log += "\[[time_stamp()]\] <font color='red'>extracted [H.name]'s [O] with \a [src]</font>"
 			H.attack_log += "\[[time_stamp()]\] <font color='red'>had their [O] removed by [user.name]'s [src]</font>"
-			var/obj/item/organ/OO = O.remove(user)
+			var/obj/item/organ/internal/OO = O.remove(user)
 			if(OO && istype(OO))
 
 				// Stop the organ from continuing to reject.
@@ -99,7 +99,7 @@
 /obj/item/weapon/organ_remover/proc/can_use(var/mob/user)
 	// Something something vox bioelectric fields something nanites.
 	// I'd rather not have shitters picking these up and removing the clown's lungs for giggles.
-	if(!ishuman(user))
+	if(!ishigherbeing(user))
 		return FALSE
 
 	if(!vox_only)

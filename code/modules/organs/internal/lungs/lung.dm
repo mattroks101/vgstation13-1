@@ -7,7 +7,7 @@
 	name = "lungs"
 	parent_organ = LIMB_CHEST
 	organ_type = "lungs"
-	removed_type = /obj/item/organ/lungs
+	removed_type = /obj/item/organ/internal/lungs
 
 	min_bruised_damage = 8
 	min_broken_damage = 15
@@ -62,6 +62,8 @@
 				H.fire_alert = max(H.fire_alert, 1)
 		else
 			switch(breath.temperature)
+				if(H.species.cold_level_1 to H.species.heat_level_1)
+					return
 				if(-INFINITY to H.species.cold_level_3)
 					H.apply_damage(COLD_GAS_DAMAGE_LEVEL_3, BURN, LIMB_HEAD, used_weapon = "Excessive Cold")
 					H.fire_alert = max(H.fire_alert, 1)
@@ -105,7 +107,7 @@
 
 /datum/organ/internal/lungs/vox
 	name = "\improper Vox lungs"
-	removed_type = /obj/item/organ/lungs/vox
+	removed_type = /obj/item/organ/internal/lungs/vox
 
 	gasses = list(
 		new /datum/lung_gas/metabolizable("nitrogen",          min_pp=16, max_pp=140),
@@ -117,7 +119,7 @@
 
 /datum/organ/internal/lungs/plasmaman
 	name = "\improper Plasmaman lungs"
-	removed_type = /obj/item/organ/lungs/plasmaman
+	removed_type = /obj/item/organ/internal/lungs/plasmaman
 
 	gasses = list(
 		new /datum/lung_gas/metabolizable("toxins", min_pp=16, max_pp=140),

@@ -221,7 +221,8 @@ won't update every console in existence) but it's more of a hassle to do. Also, 
 /obj/machinery/computer/rdconsole/emag(mob/user)
 	playsound(get_turf(src), 'sound/effects/sparks4.ogg', 75, 1)
 	emagged = 1
-	to_chat(user, "<span class='notice'>You disable the security protocols</span>")
+	if(user)
+		to_chat(user, "<span class='notice'>You disable the security protocols</span>")
 
 /obj/machinery/computer/rdconsole/proc/deconstruct_item(mob/user)
 	linked_destroy.busy = 1
@@ -301,6 +302,8 @@ won't update every console in existence) but it's more of a hassle to do. Also, 
 	else if(href_list["hax"]) // aww shit
 		if(!usr.client.holder)
 			return
+		if (alert("Are you sure you want to do this? This will maximize every research level!", "Admin R&D console Hax.", "Yes", "No") != "Yes")
+			return TRUE
 		screen = 0.0
 		spawn(50)
 			Maximize()

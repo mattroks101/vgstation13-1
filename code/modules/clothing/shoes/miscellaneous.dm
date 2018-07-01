@@ -143,6 +143,16 @@
 		qdel(W)
 		qdel(src)
 
+/obj/item/clothing/shoes/clown_shoes/elf
+	desc = "Jolly shoes for a jolly little elf!"
+	name = "elf shoes"
+	icon_state = "elf_shoes"
+	item_state = "elf_shoes"
+	_color = "elf_shoes"
+
+/obj/item/clothing/shoes/clown_shoes/elf/stickymagic
+	canremove = 0
+
 #define CLOWNSHOES_RANDOM_SOUND "random sound"
 
 /obj/item/clothing/shoes/clown_shoes/advanced
@@ -284,6 +294,7 @@
 	desc = "Tovarish, no one will realize you stepped on a pile of shit if your pair already looks like shit."
 	icon_state = "nr_boots"
 	item_state = "nr_boots"
+	heat_conductivity = INS_ARMOUR_HEAT_CONDUCTIVITY
 
 /obj/item/clothing/shoes/cult
 	name = "boots"
@@ -418,3 +429,9 @@
 	desc = "Perfect for wearing out to a late night double feature."
 	icon_state = "frankshoes"
 	item_state = "frankshoes"
+
+/obj/item/clothing/shoes/clockwork_boots
+	name = "clockwork boots"
+	desc = "A pair of boots worn by the followers of Ratvar."
+	icon_state = "clockwork"
+	item_state = "clockwork"

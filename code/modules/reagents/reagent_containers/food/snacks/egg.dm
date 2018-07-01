@@ -66,7 +66,7 @@
 	if (istype(W, /obj/item/weapon/reagent_containers))
 		if(W.reagents.amount_cache.len == 1 && W.reagents.has_reagent(FLOUR, 5))
 			W.reagents.remove_reagent(FLOUR,5)
-			new /obj/item/weapon/reagent_containers/food/snacks/dough(src)
+			new /obj/item/weapon/reagent_containers/food/snacks/dough(loc)
 			to_chat(user, "You make some dough.")
 			qdel(src)
 			return 1
@@ -108,4 +108,4 @@
 /obj/item/weapon/reagent_containers/food/snacks/egg/cockatrice/New()
 	..()
 
-	reagents.add_reagent(PETRITRICIN, rand(0.5,1.5))
+	reagents.add_reagent(PETRITRICIN, rand(5,15)/10)

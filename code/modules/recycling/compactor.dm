@@ -45,6 +45,9 @@
 /obj/machinery/disposal/compactor/handle_trunk()
 	return
 
+/obj/machinery/disposal/compactor/can_load_crates()
+	return FALSE
+
 /obj/machinery/disposal/compactor/update_icon()
 	icon_state = "compactor_[stat & NOPOWER ? "off" : "on"]"
 
@@ -95,7 +98,7 @@
 /obj/machinery/disposal/compactor/attackby(var/obj/item/I, var/mob/user)
 	add_fingerprint(user)
 	if(iswrench(I)) //We want this to be a high level operation, before any of the place in bin code or disassemble bin code
-		wrenchAnchor(user, 30)
+		wrenchAnchor(user)
 		power_change()
 		return
 	if(!emagged && istype(I,/obj/item/weapon/card/emag))
@@ -105,7 +108,7 @@
 		return
 	..()
 
-/obj/machinery/disposal/compactor/Move(atom/newloc, direct)
+/obj/machinery/disposal/compactor/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0, glide_size_override = 0)
 	..()
 	if(prob(2))
 		var/atom/movable/AM = pick(contents)

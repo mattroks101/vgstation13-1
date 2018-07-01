@@ -74,6 +74,7 @@ rcd light flash thingy on matter drain
 
 /spell/aoe_turf/disable_rcd
 	name = "Disable RCDs"
+	user_type = USER_TYPE_MALFAI
 	panel = MALFUNCTION
 	charge_type = Sp_CHARGES
 	charge_max = 1
@@ -83,8 +84,8 @@ rcd light flash thingy on matter drain
 /spell/aoe_turf/disable_rcd/cast(list/targets, mob/user)
 	for(var/obj/item/device/rcd/matter/engineering/rcd in world)
 		rcd.disabled = 1
-	for(var/obj/item/mecha_parts/mecha_equipment/tool/rcd/rcd in world)
-		rcd.disabled = 1
+	for(var/obj/item/mecha_parts/mecha_equipment/tool/red/red in world)
+		red.disabled = 1
 	to_chat(src, "RCD-disabling pulse emitted.")
 
 /datum/AI_Module/small/overload_machine
@@ -97,6 +98,7 @@ rcd light flash thingy on matter drain
 
 /spell/targeted/overload_machine
 	name = "Overload Machine"
+	user_type = USER_TYPE_MALFAI
 	panel = MALFUNCTION
 	spell_flags = WAIT_FOR_CLICK
 	range = GLOBALCAST
@@ -129,6 +131,7 @@ rcd light flash thingy on matter drain
 
 /spell/aoe_turf/conjure/place_transformer
 	name = "Place Robotic Factory"
+	user_type = USER_TYPE_MALFAI
 	panel = MALFUNCTION
 	charge_type = Sp_CHARGES
 	charge_max = 1
@@ -200,6 +203,7 @@ rcd light flash thingy on matter drain
 
 /spell/aoe_turf/blackout
 	name = "Blackout"
+	user_type = USER_TYPE_MALFAI
 	panel = MALFUNCTION
 	charge_type = Sp_CHARGES
 	charge_max = 3
@@ -223,6 +227,7 @@ rcd light flash thingy on matter drain
 
 /spell/aoe_turf/interhack
 	name = "Fake Announcement"
+	user_type = USER_TYPE_MALFAI
 	panel = MALFUNCTION
 	charge_type = Sp_CHARGES
 	charge_max = 3
@@ -321,6 +326,7 @@ rcd light flash thingy on matter drain
 
 /spell/targeted/upgrade_camera
 	name = "Upgrade Camera"
+	user_type = USER_TYPE_MALFAI
 	panel = MALFUNCTION
 	charge_type = Sp_CHARGES
 	charge_max = 10
@@ -361,6 +367,7 @@ rcd light flash thingy on matter drain
 
 /spell/aoe_turf/module_picker
 	name = "Select Module"
+	user_type = USER_TYPE_MALFAI
 	panel = MALFUNCTION
 	var/datum/module_picker/MP
 	charge_max = 10
@@ -424,7 +431,7 @@ rcd light flash thingy on matter drain
 		src.processing_time -= AM.cost
 		if(AM.one_time)
 			possible_modules -= AM
-		stat_collection.malf.bought_modules += AM.module_name
+		stat_collection.malf_modules += AM.module_name
 
 	if(href_list["desc"])
 		var/datum/AI_Module/AM = locate(href_list["module"])

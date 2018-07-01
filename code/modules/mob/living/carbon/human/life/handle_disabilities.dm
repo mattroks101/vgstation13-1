@@ -1,6 +1,10 @@
 //Refer to life.dm for caller
 
 /mob/living/carbon/human/proc/handle_disabilities()
+	if(disabilities & ASTHMA)
+		if(prob(0.2))
+			asthma_attack()
+
 	if(disabilities & EPILEPSY)
 		if((prob(1)) && (paralysis < 1))
 			seizure(10, 1000)
@@ -61,6 +65,9 @@
 						"Don't tell Chase", \
 						"not so tough now huh", \
 						"WERE NOT BAY!!", \
+						"IF YOU DONT LIKE THE CYBORGS OR SLIMES WHY DONT YU O JUST MAKE YORE OWN!", \
+						"DONT TALK TO ME ABOUT BALANCE!!!!", \
+						"YOU AR JUS LAZY AND DUMB JAMITORS AND SERVICE ROLLS", \
 						"BLAME HOSHI!!!", \
 						"ARRPEE IZ DED!!!", \
 						"THERE ALL JUS MEATAFRIENDS!", \

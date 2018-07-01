@@ -183,8 +183,8 @@ var/list/datum/stack_recipe/plastic_recipes = list ( \
 		new/datum/stack_recipe("privacy curtains", /obj/structure/curtain/open/privacy, 4, one_per_turf = 1, on_floor = 1), \
 		new/datum/stack_recipe("shower curtains", /obj/structure/curtain/open/shower, 4, one_per_turf = 1, on_floor = 1), \
 		new/datum/stack_recipe("engineering shower curtains", /obj/structure/curtain/open/shower/engineering, 4, one_per_turf = 1, on_floor = 1), \
-		new/datum/stack_recipe("security shower curtains", /obj/structure/curtain/open/shower/medical, 4, one_per_turf = 1, on_floor = 1), \
-		new/datum/stack_recipe("medical shower curtains", /obj/structure/curtain/open/shower/security, 4, one_per_turf = 1, on_floor = 1), \
+		new/datum/stack_recipe("security shower curtains", /obj/structure/curtain/open/shower/security, 4, one_per_turf = 1, on_floor = 1), \
+		new/datum/stack_recipe("medical shower curtains", /obj/structure/curtain/open/shower/medical, 4, one_per_turf = 1, on_floor = 1), \
 		), 4),
 	)
 
@@ -224,7 +224,7 @@ var/list/datum/stack_recipe/gold_recipes = list ( \
  * Phazon
  */
 var/list/datum/stack_recipe/phazon_recipes = list( \
-	new/datum/stack_recipe("phazon floor tile", /obj/item/stack/tile/mineral/phazon, 1, 4, 20), \
+	new/datum/stack_recipe("phazon floor tile", /obj/item/stack/tile/mineral/phazon, 1, 40, 20), \
 	)
 
 /obj/item/stack/sheet/mineral/phazon
@@ -290,7 +290,7 @@ var/list/datum/stack_recipe/silver_recipes = list ( \
 	recyck_mat = MAT_CLOWN
 
 var/list/datum/stack_recipe/clown_recipes = list ( \
-	new/datum/stack_recipe("bananium floor tile", /obj/item/stack/tile/mineral/clown, 1, 4, 20), \
+	new/datum/stack_recipe("bananium floor tile", /obj/item/stack/tile/mineral/clown, 1, 40, 20), \
 	)
 
 /obj/item/stack/sheet/mineral/clown/New(var/loc, var/amount=null)

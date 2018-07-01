@@ -333,7 +333,7 @@ var/list/uplink_items = list()
 	name = "Lethal Speed Chemical"
 	desc = "30 units of Hypozine, a chemical that causes the body to synthesize hyperzine, but also causes increases in muscle speed at levels that tear the body apart. Metabolizes quite slowly."
 	item = /obj/item/weapon/storage/box/syndie_kit/lethal_hyperzine
-	cost = 12
+	cost = 4
 	job = list("Chemist", "Medical Doctor", "Chief Medical Officer")
 
 //Engineer
@@ -464,6 +464,12 @@ var/list/uplink_items = list()
 	item = /obj/item/weapon/grenade/spawnergrenade/manhacks/syndicate
 	cost = 6
 
+/datum/uplink_item/dangerous/butterfly
+	name = "Butterfly Knife"
+	desc = "A butterfly knife containing a deadly viscerator. It can be flipped to conceal the blade and deploy a stored viscerator. The viscerator will self destruct after 20 seconds but the knife will renew it's storage every 25 seconds automatically."
+	item = /obj/item/weapon/butterflyknife/viscerator
+	cost = 7
+
 /datum/uplink_item/dangerous/gatling
 	name = "Gatling Gun"
 	desc = "A huge minigun. Makes up for its lack of mobility and discretion with sheer firepower. Has 200 bullets."
@@ -576,10 +582,10 @@ var/list/uplink_items = list()
 	cost = 1
 
 /datum/uplink_item/device_tools/bugdetector
-	name = "Bug Detector"
-	desc = "A functional multitool that can detect certain surveillance devices. Its screen changes color if the AI or a pAI can see you, or if a tape recorder or voice analyzer is nearby. Conspicuous if currently detecting something. Examine it to see everything it detects. "
+	name = "Bug Detector & Camera Disabler"
+	desc = "A functional multitool that can detect certain surveillance devices. Its screen changes color if the AI or a pAI can see you, or if a tape recorder or voice analyzer is nearby. Conspicuous if currently detecting something. Examine it to see everything it detects. Activating it will disable cameras nearby, plus the ones far away randomly, causing massive disruptions to the AI and anyone using them."
 	item = /obj/item/device/multitool/ai_detect
-	cost = 3
+	cost = 5
 
 /datum/uplink_item/device_tools/space_suit
 	name = "Space Suit"

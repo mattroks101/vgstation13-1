@@ -147,15 +147,17 @@
 	else
 		return ..()
 
-/obj/machinery/pipedispenser/wrenchAnchor(mob/user)
-	if(..() == 1)
-		if(anchored)
-			src.stat &= ~MAINT
-			power_change()
-		else
-			src.stat |= MAINT
-			if (user.machine==src)
-				user << browse(null, "window=pipedispenser")
+/obj/machinery/pipedispenser/wrenchAnchor(var/mob/user)
+	. = ..()
+	if(!.)
+		return
+	if(anchored)
+		src.stat &= ~MAINT
+		power_change()
+	else
+		src.stat |= MAINT
+		if (user.machine==src)
+			user << browse(null, "window=pipedispenser")
 
 
 /obj/machinery/pipedispenser/disposal
@@ -249,13 +251,13 @@ Nah
 					C.ptype = 5
 				if(5)
 					C.ptype = 6
-					C.density = 1
+					C.setDensity(TRUE)
 				if(6)
 					C.ptype = 7
-					C.density = 1
+					C.setDensity(TRUE)
 				if(7)
 					C.ptype = 8
-					C.density = 1
+					C.setDensity(TRUE)
 			C.add_fingerprint(usr)
 			C.update()
 			wait = 1

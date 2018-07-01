@@ -37,7 +37,7 @@ var/list/station_holomaps = list()
 	holomap_datum = new()
 	original_zLevel = loc.z
 	station_holomaps += src
-	flags |= ON_BORDER
+	flow_flags |= ON_BORDER
 	component_parts = 0
 	if(ticker && holomaps_initialized)
 		initialize()
@@ -119,8 +119,8 @@ var/list/station_holomaps = list()
 	src.attack_hand(user)
 
 /obj/machinery/station_map/attack_ghost(var/mob/user)
-	if(blessed)
-		return
+	if(!can_spook())
+		return FALSE
 	add_hiddenprint(user)
 	flick("station_map_activate", src)
 

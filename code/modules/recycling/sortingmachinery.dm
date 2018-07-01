@@ -106,6 +106,10 @@
 		interact(usr)
 		return 1
 
+/obj/item/device/destTagger/cyborg
+	name = "cyborg destination tagger"
+	mode = TRUE
+
 /obj/machinery/disposal/deliveryChute
 	name = "Delivery chute"
 	desc = "A chute for big and small packages alike!"
@@ -114,6 +118,9 @@
 	var/c_mode = 0
 	var/doFlushIn=0
 	var/num_contents=0
+
+/obj/machinery/disposal/deliveryChute/no_deconstruct
+	deconstructable = FALSE
 
 /obj/machinery/disposal/deliveryChute/New()
 	..()
@@ -130,6 +137,9 @@
 	return
 
 /obj/machinery/disposal/deliveryChute/Bumped(var/atom/movable/AM) //Go straight into the chute
+	if(AM.anchored)
+		return
+
 	if(istype(AM, /obj/item/projectile) || istype(AM, /obj/item/weapon/dummy))
 		return
 
@@ -213,7 +223,7 @@
 				C.ptype = 8 // 8 =  Delivery chute
 				C.update()
 				C.anchored = 1
-				C.density = 1
+				C.setDensity(TRUE)
 				qdel(src)
 			return
 		else

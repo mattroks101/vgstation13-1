@@ -175,7 +175,6 @@
 	if(!put_in_hand_check(W, index))
 		return 0
 
-
 	if(W.prepickup(src))
 		return 0
 
@@ -230,8 +229,11 @@
 	return put_in_hand(active_hand, W)
 
 //Puts the item into our inactive hand if possible. returns 1 on success.
-/mob/proc/put_in_inactive_hand(var/obj/item/W)
-	return put_in_hand(get_inactive_hand_index(), W)
+/mob/proc/put_in_inactive_hand(var/obj/item/W) // The technology has advanced, we can now handle lifeforms with more than 2 hands.
+	for (var/i = held_items.len; i > 0; i--) // held_items.len returns us to the last available hand. We iterate until we come to 0.
+		if (i != active_hand && put_in_hand(i, W))
+			return 1
+	return 0
 
 //Puts the item our active hand if possible. Failing that it tries our inactive hand. Returns 1 on success.
 //If both fail it drops it on the floor and returns 0.
@@ -239,6 +241,9 @@
 /mob/proc/put_in_hands(var/obj/item/W)
 	if(!W)
 		return 0
+	for (var/i = 1 to held_items.len)
+		if (held_items[i] == W)
+			return 0 // If it's already in your hands and you move it, it's in a superposition and breaks everything.
 	if(put_in_active_hand(W))
 		return 1
 	else if(put_in_inactive_hand(W))
@@ -409,6 +414,20 @@
 /mob/proc/has_organ_for_slot(slot)
 	return TRUE
 
+//Returns true if mob is wearing the item in any of the inventory slots (NOT hands). If slot is specified, only checks if the item is in that slot
+//Item can be either an object or a path. In the second case, the proc checks if there is a worn item of that type (in that slot), and returns the item
+/mob/proc/is_wearing_item(obj/item/I, slot = null)
+	if(slot)
+		if(ispath(I))
+			var/obj/item/item = get_item_by_slot(slot)
+			if(istype(item, I))
+				return item
+		return (get_item_by_slot(slot) == I)
+	else
+		if(ispath(I))
+			return (locate(I) in get_equipped_items())
+		return (I in get_equipped_items())
+
 /mob/living/carbon/human/proc/equip_if_possible(obj/item/W, slot, act_on_fail = EQUIP_FAILACTION_DELETE) // since byond doesn't seem to have pointers, this seems like the best way to do this :/
 	//warning: icky code
 	var/equipped = 0
@@ -494,7 +513,7 @@
 	return equipped
 
 /mob/proc/get_id_card()
-	for(var/obj/item/I in src.get_all_slots())
+	for(var/obj/item/I in src.get_all_slots() + held_items)
 		. = I.GetID()
 		if(.)
 			break

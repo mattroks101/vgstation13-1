@@ -2,6 +2,7 @@
 	name = "Magic Missile"
 	abbreviation = "MM"
 	desc = "This spell fires several, slow moving, magic projectiles at nearby targets."
+	user_type = USER_TYPE_WIZARD
 
 	school = "evocation"
 	charge_max = 150
@@ -42,3 +43,9 @@
 	proj_trail = 1
 	proj_trail_lifespan = 5
 	proj_trail_icon_state = "magicmd"
+
+/obj/item/projectile/spell_projectile/seeking/magic_missile/indiscriminate/choose_prox_targets(user = carried.holder, spell_holder = src)
+	if(!carried)
+		return
+
+	return carried.choose_prox_targets(arglist(args))

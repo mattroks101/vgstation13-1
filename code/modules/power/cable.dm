@@ -202,7 +202,7 @@ By design, d1 is the smallest direction and d2 is the highest
 			R.is_empty()
 	else if(istype(W, /obj/item/device/multitool))
 		if((powernet) && (powernet.avail > 0))		// is it powered?
-			to_chat(user, "<SPAN CLASS='warning'>[powernet.avail]W in power network.</SPAN>")
+			to_chat(user, "<SPAN CLASS='warning'>Power network status report - Load: [powernet.load]W - Available: [powernet.avail]W.</SPAN>")
 		else
 			to_chat(user, "<SPAN CLASS='notice'>The cable is not powered.</SPAN>")
 
@@ -265,9 +265,7 @@ By design, d1 is the smallest direction and d2 is the highest
 			return 0
 
 		if(electrocute_mob(user, powernet, src, siemens_coeff))
-			var/datum/effect/effect/system/spark_spread/s = new
-			s.set_up(5,1,src)
-			s.start()
+			spark(src, 5)
 			return 1
 
 	return 0

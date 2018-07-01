@@ -45,6 +45,7 @@
 	var/role_alt_title
 
 	var/datum/job/assigned_job
+	var/datum/religion/faith
 
 	var/list/kills=list()
 	var/list/datum/objective/objectives = list()
@@ -118,6 +119,13 @@
 			output += "<B>Objective #[obj_count]</B>: [objective.explanation_text]"
 			obj_count++
 
+	// -- Religions --
+	if (faith) // This way they can get their religion changed
+		output += "<b>Religion:</b> [faith.name] <br/> \
+				   <b>Leader:</b> [faith.religiousLeader] <br/>"
+
+		if (faith.religiousLeader == src)
+			output += "You can convert people by [faith.convert_method] <br />"
 	recipient << browse(output,"window=memory")
 
 /datum/mind/proc/edit_memory()
@@ -143,6 +151,8 @@
 		"malfunction",
 		"resteam",
 		"dsquad",
+		"elite",
+		"custom",
 	)
 	var/text = ""
 
@@ -401,10 +411,32 @@
 			text += "<a href='?src=\ref[src];dsquad=dsquad'>yes</a>|<b>NO</b>"
 		sections["dsquad"] = text
 
+	/** ELITE SYNDICATE SQUAD ***/
+	if (istype(current, /mob/living/carbon))
+		text = "Elite Syndicate Squad"
+		text = "<i><b>[text]</b></i>: "
+		if (src in ticker.mode.elite_syndie)
+			text += "<b>YES</b>|<a href='?src=\ref[src];elite=clear'>no</a>"
+		else
+			text += "<a href='?src=\ref[src];elite=elite'>yes</a>|<b>NO</b>"
+		sections["elite"] = text
+
+	/** CUSTOM STRIKE TEAM ***/
+	if (istype(current, /mob/living/carbon))
+		text = "Custom Team"
+		text = "<i><b>[text]</b></i>: "
+		if (src in ticker.mode.custom_team)
+			text += "<b>YES</b>|<a href='?src=\ref[src];custom=clear'>no</a>"
+		else
+			text += "<a href='?src=\ref[src];custom=custom'>yes</a>|<b>NO</b>"
+		sections["custom"] = text
+
 	out += {"<br>
 		<b>Strike Teams:</b><br>
 		[sections["resteam"]]<br>
 		[sections["dsquad"]]<br>
+		[sections["elite"]]<br>
+		[sections["custom"]]<br>
 		<br>"}
 
 	out += {"<br>
@@ -1081,6 +1113,7 @@
 				if(src in ticker.mode.ert)
 					ticker.mode.ert -= src
 					special_role = null
+					response_team_members -= current
 					to_chat(current, "<span class='danger'><FONT size = 3>You have been demoted! You are no longer an Emergency Responder!</FONT></span>")
 					log_admin("[key_name_admin(usr)] has de-ERT'ed [current].")
 			if ("resteam")
@@ -1088,6 +1121,7 @@
 					ticker.mode.ert += src
 					assigned_role = "MODE"
 					special_role = "Response Team"
+					response_team_members |= current
 					log_admin("[key_name(usr)] has ERT'ed [key_name(current)].")
 
 	else if (href_list["dsquad"])
@@ -1104,6 +1138,37 @@
 					assigned_role = "MODE"
 					special_role = "Death Commando"
 					log_admin("[key_name(usr)] has deathsquad'ed [key_name(current)].")
+
+	else if (href_list["elite"])
+		switch(href_list["elite"])
+			if ("clear")
+				if(src in ticker.mode.elite_syndie)
+					ticker.mode.elite_syndie -= src
+					special_role = null
+					to_chat(current, "<span class='danger'><FONT size = 3>You have been demoted! You are no longer an Elite Syndicate Squadie!</FONT></span>")
+					log_admin("[key_name_admin(usr)] has de-elite syndie squad'ed [current].")
+			if ("elite")
+				if (!(src in ticker.mode.elite_syndie))
+					ticker.mode.elite_syndie += src
+					assigned_role = "MODE"
+					special_role = "Syndicate Commando"
+					log_admin("[key_name(usr)] has elite syndie squad'ed [key_name(current)].")
+
+	else if (href_list["custom"])
+		var/datum/striketeam/team = sent_strike_teams[TEAM_CUSTOM]
+		switch(href_list["custom"])
+			if ("clear")
+				if(src in ticker.mode.custom_team)
+					ticker.mode.custom_team -= src
+					special_role = null
+					to_chat(current, "<span class='danger'><FONT size = 3>You have been demoted! You are no longer part of the [team.striketeam_name]!</FONT></span>")
+					log_admin("[key_name_admin(usr)] has de-striketeam'ed [current].")
+			if ("custom")
+				if (!(src in ticker.mode.custom_team))
+					ticker.mode.custom_team += src
+					assigned_role = "MODE"
+					special_role = "Custom Team"
+					log_admin("[key_name(usr)] has striketeam'ed [key_name(current)].")
 
 
 	edit_memory()
@@ -1462,12 +1527,16 @@ proc/clear_memory(var/silent = 1)
 /proc/get_ghost_from_mind(var/datum/mind/mind)
 	if(!mind)
 		return
-	for(var/mob/dead/observer/G in player_list)
-		if(G.mind == mind)
-			return G
+	for(var/mob/M in player_list)
+		M = M.get_bottom_transmogrification()
+		if(isobserver(M))
+			if(M.mind == mind)
+				return M
 
 /proc/mind_can_reenter(var/datum/mind/mind)
 	var/mob/dead/observer/G = get_ghost_from_mind(mind)
-	if(G && G.client && G.can_reenter_corpse)
-		return TRUE
-	return FALSE
+	var/mob/M
+	if(G)
+		M = G.get_top_transmogrification()
+		if(M.client && G.can_reenter_corpse)
+			return G

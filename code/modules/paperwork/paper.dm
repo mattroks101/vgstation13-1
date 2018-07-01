@@ -185,7 +185,9 @@
 	overlays.len = 0
 	updateinfolinks()
 	update_icon()
-
+	if(istype(loc, /obj/item/weapon/storage/bag/clipboard))
+		var/obj/C = loc
+		C.update_icon()
 
 /obj/item/weapon/paper/proc/parsepencode(var/mob/user,var/obj/item/i, var/t)
 	if(istype(i,/obj/item/weapon/pen))
@@ -241,7 +243,7 @@
 		return
 
 	if(href_list["picture"])
-		if(!ishuman(usr))
+		if(!ishigherbeing(usr))
 			return
 		var/mob/living/carbon/human/H = usr
 		H.put_in_hands(img)
@@ -251,43 +253,57 @@
 		var/id = href_list["write"]
 		//var/t = strip_html_simple(input(usr, "What text do you wish to add to " + (id=="end" ? "the end of the paper" : "field "+id) + "?", "[name]", null),8192) as message
 		//var/t =  strip_html_simple(input("Enter what you want to write:", "Write", null, null)  as message, MAX_MESSAGE_LEN)
-		var/t = sanitize(input("Enter what you want to write:", "Write", null, null) as message, MAX_MESSAGE_LEN)
-		var/obj/item/i = usr.get_active_hand() // Check to see if he still got that darn pen, also check if he's using a crayon or pen.
-		if(!istype(i,/obj/item/weapon/pen) && !istype(i,/obj/item/toy/crayon))
-			to_chat(usr, "<span class='warning'>Please ensure your pen is in your active hand and that you're holding the paper.</span>")
-			return
+		var/new_text
 
-		if(!Adjacent(usr, 1)) //the 1 means that the paper can be in one other item and be written on
-			return
+		//Wrap this part in a loop to prevent text from getting lost
+		do
+			new_text = sanitize(input("Enter what you want to write:", "Write", new_text) as null|message, MAX_MESSAGE_LEN)
+			var/obj/item/i = usr.get_active_hand() // Check to see if he still got that darn pen, also check if he's using a crayon or pen.
 
-		log += "<br />\[[time_stamp()]] [key_name(usr)] added: [t]"
+			//The user either entered a non-value, or logged off
+			if(isnull(new_text) || !usr.key)
+				return
 
-		t = replacetext(t, "\n", "<BR>")
+			//Not writing with a pen or crayon
+			if(!istype(i,/obj/item/weapon/pen) && !istype(i,/obj/item/toy/crayon))
+				to_chat(usr, "<span class='warning'>Please ensure your pen is in your active hand and that you're holding the paper.</span>")
+				continue
+
+			//Lost the paper or lost consciousness
+			if(!Adjacent(usr, 1) || usr.isUnconscious()) //the 1 means that the paper can be in one other item and be written on
+				to_chat(usr, "<span class='warning'>You are to unable to write on this paper.</span>")
+				continue
+
+		while(isnull(new_text))
+
+		log += "<br />\[[time_stamp()]] [key_name(usr)] added: [new_text]"
+
+		new_text = replacetext(new_text, "\n", "<BR>")
 
 		spawn()
-			t = parsepencode(usr,i,t)
+			new_text = parsepencode(usr, usr.get_active_hand() ,new_text)
 
 			//Count the fields
 			var/laststart = 1
 			while(1)
-				var/j = findtext(t, "<span class=\"paper_field\">", laststart)
+				var/j = findtext(new_text, "<span class=\"paper_field\">", laststart)
 				if(j==0)
 					break
 				laststart = j+1
 				fields++
 
 			if(id!="end")
-				addtofield(text2num(id), t) // He wants to edit a field, let him.
+				addtofield(text2num(id), new_text) // He wants to edit a field, let him.
 			else
-				info += t // Oh, he wants to edit to the end of the file, let him.
+				info += new_text // Oh, he wants to edit to the end of the file, let him.
 				updateinfolinks()
 
 			show_text(usr, links = TRUE)
 
 			update_icon()
 
-			if(istype(loc, /obj/item/weapon/clipboard))
-				var/obj/item/weapon/clipboard/C = loc
+			if(istype(loc, /obj/item/weapon/storage/bag/clipboard))
+				var/obj/item/weapon/storage/bag/clipboard/C = loc
 				C.update_icon()
 
 	if(href_list["help"])
@@ -309,7 +325,6 @@
 		return
 
 	else if(istype(P, /obj/item/weapon/stamp))
-		//if((!in_range(src, user) && loc != user && !( istype(loc, /obj/item/weapon/clipboard) ) && loc.loc != user && user.get_active_hand() != P)) return //What the actual FUCK
 
 		if(istype(P, /obj/item/weapon/stamp/clown) && !clown)
 			to_chat(user, "<span class='notice'>You are totally unable to use the stamp. HONK!</span>")
@@ -329,16 +344,21 @@
 
 		to_chat(user, "<span class='notice'>You stamp [src] with your rubber stamp.</span>")
 
-	else if(istype(P, /obj/item/weapon/photo))
+		if(istype(loc, /obj/item/weapon/storage/bag/clipboard))
+			var/obj/C = loc
+			C.update_icon()
+
+	else if(istype(P, /obj/item/weapon/photo) && !istype(src, /obj/item/weapon/paper/envelope))
+		if(img)
+			to_chat(user, "<span class='notice'>This paper already has a photo attached.</span>")
+			return
+
 		if(user.drop_item(P, src))
-			if(img)
-				to_chat(user, "<span class='notice'>This paper already has a photo attached.</span>")
-				return
 			img = P
 			to_chat(user, "<span class='notice'>You attach the photo to the piece of paper.</span>")
 	else if(P.is_hot())
 		src.ashify_item(user)
-		return //no fingerprints, paper is gone
+		return 1 //no fingerprints, paper is gone
 	add_fingerprint(user)
 	return ..()
 
@@ -502,6 +522,13 @@ var/global/list/paper_folding_results = list ( \
 	name = "paper- 'Recent Attack'"
 	info = "We still do not know who were responsible for the recent attack and escape of several test subjects.  The initial investigation points to the Syndicate but we cannot say for sure at this time.  This has violated our contract with REDACTED and REDACTED.  We may have to close the facility. "
 
+/obj/item/weapon/paper/suitdispenser
+	name = "paper- 'Suit Dispenser Manual - How to use them?'"
+	info = "Step 1: Place the items that you want the dispenser to dispense on top of one of them, preferably the one bellow this paper.<BR>\nStep 2: Click the dispenser, and choose <b>Define Preset from items on top</b>.<BR>\nStep 3: Click every dispenser you wish to see dispensing, and click <b>Choose a Preset</b>.<BR>\nTo re-use a dispenser, just click <b>Resupply</b>."
+
 /obj/item/weapon/paper/outoforder
 	name = "paper- 'OUT OF ORDER'"
 	info = "<B>OUT OF ORDER</B>"
+
+/obj/item/weapon/paper/manifest
+	name = "Supply Manifest"

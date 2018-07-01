@@ -321,7 +321,7 @@
 	if (src.ear_damage < 25)
 		src.ear_damage = 0
 
-	src.density = !( src.lying )
+	src.setDensity(!src.lying)
 
 	if (src.sdisabilities & BLIND)
 		src.blinded = 1
@@ -371,6 +371,8 @@
 					if(prob(70))
 						newslime = primarytype
 					else
+						newslime = slime_mutation[rand(1,4)]
+					if(i == 4)
 						newslime = slime_mutation[rand(1,4)]
 
 					var/mob/living/carbon/slime/M = new newslime(loc)

@@ -95,7 +95,8 @@
 
 /obj/machinery/alarm/vox
 	preset = AALARM_PRESET_VOX
-	req_access = list()
+	req_one_access = list()
+	req_access = list(access_trade)
 
 /obj/machinery/alarm/proc/apply_preset(var/no_cycle_after=0)
 	// Propogate settings.
@@ -509,7 +510,7 @@
 		return null
 
 	var/datum/gas_mixture/environment = location.return_air()
-	var/total = environment.oxygen + environment.carbon_dioxide + environment.toxins + environment.nitrogen
+	var/total = environment.total_moles()
 	if(total==0)
 		return null
 
@@ -543,6 +544,10 @@
 			n2o_moles+=G.moles
 		else
 			other_moles+=G.moles
+
+	var/n2o_percent = round(n2o_moles / total * 100, 2)
+	var/other_percent = round(other_moles / total * 100, 2)
+
 	var/other_dangerlevel = get_danger_level(other_moles*partial_pressure, current_settings)
 	current_settings = TLV["n2o"]
 	var/n2o_dangerlevel = get_danger_level(n2o_moles*partial_pressure, current_settings)
@@ -561,8 +566,8 @@
 	percentages["nitrogen"]=nitrogen_percent
 	percentages["co2"]=co2_percent
 	percentages["plasma"]=plasma_percent
-	percentages["n2o"]=n2o_moles
-	percentages["other"]=other_moles
+	percentages["n2o"]=n2o_percent
+	percentages["other"]=other_percent
 	data["contents"]=percentages
 
 	var/danger[0]
@@ -638,7 +643,7 @@
 	return data
 
 
-/obj/machinery/alarm/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+/obj/machinery/alarm/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = NANOUI_FOCUS)
 	var/list/data=src.get_nano_data(user,FALSE)
 
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data, force_open)
@@ -829,7 +834,7 @@
 			return ..() //Sanity
 
 		if(1)
-			if(iscoil(W))
+			if(iscablecoil(W))
 				var/obj/item/stack/cable_coil/coil = W
 				if(coil.amount < 5)
 					to_chat(user, "You need more cable for this!")
@@ -989,7 +994,7 @@ FIRE ALARM
 						update_icon()
 						getFromPool(/obj/item/stack/cable_coil, get_turf(user), 5)
 			if(1)
-				if(iscoil(W))
+				if(iscablecoil(W))
 					var/obj/item/stack/cable_coil/coil = W
 					if(coil.amount < 5)
 						to_chat(user, "You need more cable for this!")

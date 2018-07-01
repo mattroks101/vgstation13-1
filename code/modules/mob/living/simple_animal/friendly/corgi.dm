@@ -1,6 +1,6 @@
 //Corgi
 /mob/living/simple_animal/corgi
-	name = "\improper corgi"
+	name = "corgi"
 	real_name = "corgi"
 
 	desc = "It's a corgi."
@@ -16,6 +16,8 @@
 	emote_see = list("shakes its head", "shivers")
 	speak_chance = 1
 	turns_per_move = 10
+
+	speak_override = TRUE
 
 	meat_type = /obj/item/weapon/reagent_containers/food/snacks/meat/animal/corgi
 	holder_type = /obj/item/weapon/holder/animal/corgi
@@ -143,34 +145,7 @@
 		if(!Adjacent(usr) || !(ishuman(usr) || ismonkey(usr) || isrobot(usr) ||  isalienadult(usr)))
 			return
 		var/remove_from = href_list["remove_inv"]
-		switch(remove_from)
-			if("head")
-				if(inventory_head)
-					name = real_name
-					desc = initial(desc)
-					speak = list("YAP", "Woof!", "Bark!", "AUUUUUU")
-					speak_emote = list("barks", "woofs")
-					emote_hear = list("barks", "woofs", "yaps","pants")
-					emote_see = list("shakes its head", "shivers")
-					min_oxy = initial(min_oxy)
-					minbodytemp = initial(minbodytemp)
-					maxbodytemp = initial(maxbodytemp)
-					set_light(0)
-					inventory_head.forceMove(src.loc)
-					inventory_head = null
-					regenerate_icons()
-				else
-					to_chat(usr, "<span class='warning'>There is nothing to remove from its [remove_from].</span>")
-					return
-			if("back")
-				if(inventory_back)
-					inventory_back.forceMove(src.loc)
-					inventory_back = null
-					regenerate_icons()
-				else
-					to_chat(usr, "<span class='warning'>There is nothing to remove from its [remove_from].</span>")
-					return
-
+		remove_inventory(remove_from,usr)
 		show_inv(usr)
 
 	//Adding things to inventory
@@ -280,7 +255,7 @@
 			desc = "Probably better than the last captain."
 			valid = 1
 
-		if(/obj/item/clothing/head/kitty, /obj/item/clothing/head/collectable/kitty)
+		if(/obj/item/clothing/head/kitty, /obj/item/clothing/head/kitty/collectable)
 			name = "Runtime"
 			emote_see = list("coughs up a furball", "stretches")
 			emote_hear = list("purrs")
@@ -395,6 +370,24 @@
 			SetLuminosity(1)
 			valid = 1
 		*/
+		if(/obj/item/clothing/head/alien_antenna)
+			name = "Al-Ian"
+			desc = "Take us to your dog biscuits!"
+			valid = 1
+
+		if(/obj/item/clothing/head/franken_bolt)
+			name = "Corgenstein's monster"
+			desc = "We can rebuild him, we have the technology!"
+			valid = 1
+
+		if(/obj/item/clothing/mask/vamp_fangs)
+			var/obj/item/clothing/mask/vamp_fangs/V = item_to_add
+			if(!V.glowy_fangs)
+				name = "Vlad the Ianpaler"
+				desc = "Listen to them, the children of the night. What music they make!"
+				valid = 1
+			else
+				to_chat(usr, "<span class = 'notice'>The glow of /the [V] startles [real_name]!</span>")
 
 	if(valid)
 		if(usr)
@@ -430,6 +423,36 @@
                         dir = i
                         sleep(1)
 
+/mob/living/simple_animal/corgi/proc/remove_inventory(var/remove_from = "head", mob/user)
+	switch(remove_from)
+		if("head")
+			if(inventory_head)
+				name = real_name
+				desc = initial(desc)
+				speak = list("YAP", "Woof!", "Bark!", "AUUUUUU")
+				speak_emote = list("barks", "woofs")
+				emote_hear = list("barks", "woofs", "yaps","pants")
+				emote_see = list("shakes its head", "shivers")
+				min_oxy = initial(min_oxy)
+				minbodytemp = initial(minbodytemp)
+				maxbodytemp = initial(maxbodytemp)
+				set_light(0)
+				inventory_head.forceMove(src.loc)
+				inventory_head = null
+				regenerate_icons()
+			else
+				if(user)
+					to_chat(user, "<span class='warning'>There is nothing to remove from its [remove_from].</span>")
+				return
+		if("back")
+			if(inventory_back)
+				inventory_back.forceMove(src.loc)
+				inventory_back = null
+				regenerate_icons()
+			else
+				if(user)
+					to_chat(user, "<span class='warning'>There is nothing to remove from its [remove_from].</span>")
+				return
 
 //IAN! SQUEEEEEEEEE~
 /mob/living/simple_animal/corgi/Ian
@@ -617,3 +640,74 @@
 		to_chat(usr, "<span class='warning'>[src] won't wear that!</span>")
 		return
 	..()
+
+/obj/item/weapon/reagent_containers/glass/replenishing/rescue
+	name = "rescue barrel"
+	reagent_list = list(LEPORAZINE)
+
+/mob/living/simple_animal/corgi/saint
+	name = "saint corgi"
+	real_name = "saint corgi"
+	desc = "It's a saint bernard corgi mix breed. It has a tiny rescue barrel strapped around his collar to warm up travelers."
+	icon_state = "saint_corgi"
+	icon_living = "saint_corgi"
+	icon_dead = "saint_corgi_dead"
+	health = 60
+	maxHealth = 60
+	minbodytemp = 0
+	var/turns_since_scan = 0
+	var/mob/living/carbon/victim = null
+	can_breed = FALSE //tfw no gf
+	var/obj/item/weapon/reagent_containers/glass/replenishing/rescue/barrel = null
+
+/mob/living/simple_animal/corgi/saint/Die()
+	if(barrel)
+		qdel(barrel)
+	..()
+
+/mob/living/simple_animal/corgi/saint/Topic(href, href_list)
+	if(href_list["remove_inv"] || href_list["add_inv"])
+		to_chat(usr, "<span class='warning'>[src] already has a rescue barrel!</span>")
+		return
+	..()
+
+/mob/living/simple_animal/corgi/saint/proc/rescue(var/mob/M)
+	if(!M || !Adjacent(M))
+		return
+	if(!barrel)
+		barrel = new /obj/item/weapon/reagent_containers/glass/replenishing/rescue(src)
+	barrel.attack(M,src)
+
+/mob/living/simple_animal/corgi/saint/proc/IsVictim(var/mob/M)
+	if(iscarbon(M))
+		var/mob/living/carbon/victim = M
+		if(victim.undergoing_hypothermia() && !victim.isDead())
+			return TRUE
+	return FALSE
+
+/mob/living/simple_animal/corgi/saint/UnarmedAttack(var/atom/A)
+	if(client && IsVictim(A))
+		rescue(A)
+		return
+	return ..()
+
+/mob/living/simple_animal/corgi/saint/Life()
+	if(timestopped)
+		return FALSE //under effects of time magick
+	..()
+
+	if(!incapacitated() && !resting && !locked_to && !client)
+		var/list/can_see() = view(src, 6) //Might need tweaking.
+		if(victim && (!IsVictim(victim) || !(victim.loc in can_see)))
+			victim = null
+			stop_automated_movement = FALSE
+		if(!victim)
+			for(var/mob/living/carbon/M in can_see)
+				if(IsVictim(M))
+					victim = M //Oh shit.
+					break
+		if(victim)
+			stop_automated_movement = TRUE
+			step_towards(src,victim)
+			if(Adjacent(victim) && IsVictim(victim)) //Seriously don't try to rescue the dead.
+				rescue(victim)

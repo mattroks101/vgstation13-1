@@ -334,7 +334,7 @@
 	if(ishuman(src))
 		var/mob/living/carbon/human/H = src
 		if(isslimeperson(H))
-			amount = 0
+			amount = min(amount, 0)
 
 	cloneloss = min(max(cloneloss + (amount * clone_damage_modifier), 0),(maxHealth*2))
 
@@ -431,6 +431,9 @@
 		return L
 
 /mob/living/proc/electrocute_act(const/shock_damage, const/obj/source, const/siemens_coeff = 1.0)
+	if(status_flags & GODMODE || M_NO_SHOCK in src.mutations)
+		return 0
+
 	var/damage = shock_damage * siemens_coeff
 
 	if(damage <= 0)
@@ -478,7 +481,7 @@
 	src.updatehealth()
 
 // damage ONE external organ, organ gets randomly selected from damaged ones.
-/mob/living/proc/take_organ_damage(var/brute, var/burn)
+/mob/living/proc/take_organ_damage(var/brute, var/burn, var/ignore_inorganics = FALSE)
 	if(status_flags & GODMODE)
 		return 0	//godmode
 	if(flags & INVULNERABLE)
@@ -655,13 +658,13 @@ Thanks.
 
 	return
 
-/mob/living/Move(atom/newloc, direct)
-	if (locked_to && locked_to.loc != newloc)
+/mob/living/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0, glide_size_override = 0)
+	if (locked_to && locked_to.loc != NewLoc)
 		var/datum/locking_category/category = locked_to.get_lock_cat_for(src)
 		if (locked_to.anchored || category.flags & CANT_BE_MOVED_BY_LOCKED_MOBS)
 			return 0
 		else
-			return locked_to.Move(newloc, direct)
+			return locked_to.Move(NewLoc, Dir)
 
 	if (restrained())
 		stop_pulling()
@@ -717,7 +720,7 @@ Thanks.
 						if (ok)
 							var/atom/movable/secondarypull = M.pulling
 							M.stop_pulling()
-							pulling.Move(T, get_dir(pulling, T))
+							pulling.Move(T, get_dir(pulling, T), glide_size_override = src.glide_size)
 							if(M && secondarypull)
 								M.start_pulling(secondarypull)
 
@@ -762,7 +765,7 @@ Thanks.
 													add_logs(src, HM, "caused drag damage bloodloss to", admin = (HM.ckey))
 					else
 						if (pulling)
-							pulling.Move(T, get_dir(pulling, T))
+							pulling.Move(T, get_dir(pulling, T), glide_size_override = src.glide_size)
 				else
 					stop_pulling()
 	else
@@ -777,14 +780,14 @@ Thanks.
 			M.UpdateFeed(src)
 
 	if(T != loc)
-		handle_hookchain(direct)
+		handle_hookchain(Dir)
 
 	if(.)
 		for(var/obj/item/weapon/gun/G in targeted_by) //Handle moving out of the gunner's view.
 			var/mob/living/M = G.loc
 			if(!(M in view(src)))
 				NotTargeted(G)
-		for(var/obj/item/weapon/gun/G in src) //Handle the gunner loosing sight of their target/s
+		for(var/obj/item/weapon/gun/G in src) //Handle the gunner losing sight of their target/s
 			if(G.target)
 				for(var/mob/living/M in G.target)
 					if(M && !(M in view(src)))
@@ -1304,7 +1307,7 @@ Thanks.
 				if(A == src)
 					continue
 				if(A.density)
-					if(A.flags&ON_BORDER)
+					if(A.flow_flags&ON_BORDER)
 						dense = !A.Cross(src, src.loc)
 					else
 						dense = 1
@@ -1313,7 +1316,7 @@ Thanks.
 			if((tmob.a_intent == I_HELP || tmob.restrained()) && (a_intent == I_HELP || src.restrained()) && tmob.canmove && canmove && !dense && can_move_mob(tmob, 1, 0)) // mutual brohugs all around!
 				var/turf/oldloc = loc
 				forceMove(tmob.loc)
-				tmob.forceMove(oldloc)
+				tmob.forceMove(oldloc, glide_size_override = src.glide_size)
 				now_pushing = 0
 				for(var/mob/living/carbon/slime/slime in view(1,tmob))
 					if(slime.Victim == tmob)
@@ -1356,7 +1359,7 @@ Thanks.
 
 				if (!AM.anchored)
 					var/t = get_dir(src, AM)
-					if(AM.flags & ON_BORDER && !t)
+					if(AM.flow_flags & ON_BORDER && !t)
 						t = AM.dir
 					if (istype(AM, /obj/structure/window/full))
 						for(var/obj/structure/window/win in get_step(AM,t))
@@ -1379,6 +1382,7 @@ Thanks.
 		M = new meat_type(location, src)
 	else
 		M = new meat_type(location)
+	meat_taken++
 	var/obj/item/weapon/reagent_containers/food/snacks/meat/animal/A = M
 
 	if(istype(A))
@@ -1390,6 +1394,9 @@ Thanks.
 		else
 			A.name = "[initial(src.name)] meat"
 			A.animal_name = initial(src.name)
+
+	if(reagents)
+		reagents.trans_to(A,round (reagents.total_volume * (meat_amount/meat_taken), 1))
 	return M
 
 /mob/living/proc/butcher()
@@ -1436,19 +1443,14 @@ Thanks.
 		else
 			speed_mod = 0.0
 
-		if(M_BEAK in H.mutations)
-			if(istype(H.wear_mask))
-				var/obj/item/clothing/mask/M = H.wear_mask
-				if(!(M.body_parts_covered & MOUTH)) //If our mask doesn't cover mouth, we can use our beak to help us while butchering
-					speed_mod += 0.25
-					if(!tool_name)
-						tool_name = "beak"
-			else
+		if(H.organ_has_mutation(LIMB_HEAD, M_BEAK))
+			var/obj/item/mask = H.get_item_by_slot(slot_wear_mask)
+			if(!mask || !(mask.body_parts_covered & MOUTH)) //If our mask doesn't cover mouth, we can use our beak to help us while butchering
 				speed_mod += 0.25
 				if(!tool_name)
 					tool_name = "beak"
 
-		if(M_CLAWS in H.mutations)
+		if(H.organ_has_mutation(H.get_active_hand_organ(), M_CLAWS))
 			if(!istype(H.gloves))
 				speed_mod += 0.25
 				if(!tool_name)
@@ -1508,7 +1510,6 @@ Thanks.
 		return
 
 	src.drop_meat(get_turf(src))
-	src.meat_taken++
 	src.being_butchered = 0
 	if(tool_name)
 		if(!advanced_butchery)
@@ -1611,6 +1612,117 @@ Thanks.
 		calorie_burning_heat_multiplier += rand(-5,5)/10
 	if(prob(10))
 		thermal_loss_multiplier += rand(-5,5)/10
+
+//Throwing stuff
+
+/mob/living/proc/toggle_throw_mode()
+	if (in_throw_mode)
+		throw_mode_off()
+	else
+		throw_mode_on()
+
+/mob/living/proc/throw_mode_off()
+	in_throw_mode = 0
+	if(throw_icon)
+		throw_icon.icon_state = "act_throw_off"
+
+/mob/living/proc/throw_mode_on()
+	if(gcDestroyed)
+		return
+	if(!held_items.len)	//need hands to throw
+		to_chat(src, "<span class='warning'>You have no hands with which to throw.</span>")
+		return
+	in_throw_mode = 1
+	if(throw_icon)
+		throw_icon.icon_state = "act_throw_on"
+
+/mob/proc/throw_item(var/atom/target,var/atom/movable/what=null)
+	return
+
+#define FAILED_THROW 0
+#define THREW_SOMETHING 1
+#define THREW_NOTHING -1
+
+/mob/living/throw_item(var/atom/target,var/atom/movable/what=null)
+	src.throw_mode_off()
+	if(usr.stat || !target)
+		return FAILED_THROW
+
+	if(!istype(loc,/turf))
+		to_chat(src, "<span class='warning'>You can't do that now!</span>")
+		return FAILED_THROW
+
+	if(target.type == /obj/abstract/screen)
+		return FAILED_THROW
+
+	var/atom/movable/item = src.get_active_hand()
+	if(what)
+		item=what
+
+	if(!item)
+		return THREW_NOTHING
+
+	if (istype(item, /obj/item/offhand))
+		var/obj/item/offhand/offhand = item
+		if(offhand.wielding)
+			src.throw_item(target, offhand.wielding)
+			return FAILED_THROW
+
+	else if (istype(item, /obj/item/weapon/grab))
+		var/obj/item/weapon/grab/G = item
+		item = G.toss() //throw the person instead of the grab
+		if(ismob(item))
+			var/turf/start_T = get_turf(loc) //Get the start and target tile for the descriptors
+			var/turf/end_T = get_turf(target)
+			if(start_T && end_T)
+				var/mob/M = item
+				var/start_T_descriptor = "<font color='#6b5d00'>tile at [start_T.x], [start_T.y], [start_T.z] in area [get_area(start_T)]</font>"
+				var/end_T_descriptor = "<font color='#6b4400'>tile at [end_T.x], [end_T.y], [end_T.z] in area [get_area(end_T)]</font>"
+
+				M.attack_log += text("\[[time_stamp()]\] <font color='orange'>Has been thrown by [usr.name] ([usr.ckey]) from [start_T_descriptor] with the target [end_T_descriptor]</font>")
+				usr.attack_log += text("\[[time_stamp()]\] <font color='red'>Has thrown [M.name] ([M.ckey]) from [start_T_descriptor] with the target [end_T_descriptor]</font>")
+
+				log_attack("<font color='red'>[usr.name] ([usr.ckey]) Has thrown [M.name] ([M.ckey]) from [start_T_descriptor] with the target [end_T_descriptor]</font>")
+				if(!iscarbon(usr))
+					M.LAssailant = null
+				else
+					M.LAssailant = usr
+				returnToPool(G)
+	if(!item)
+		return FAILED_THROW	//Grab processing has a chance of returning null
+
+	var/obj/item/I = item
+	if(istype(I) && I.cant_drop > 0)
+		to_chat(usr, "<span class='warning'>It's stuck to your hand!</span>")
+		return FAILED_THROW
+
+	remove_from_mob(item)
+
+	//actually throw it!
+	if (item)
+		item.forceMove(get_turf(src))
+		if(!(item.flags & NO_THROW_MSG))
+			src.visible_message("<span class='warning'>[src] has thrown [item].</span>", \
+				drugged_message = "<span class='warning'>[item] escapes from [src]'s grasp and flies away!</span>")
+
+		src.apply_inertia(get_dir(target, src))
+
+
+/*
+		if(istype(src.loc, /turf/space) || (src.flags & NOGRAV)) //they're in space, move em one space in the opposite direction
+			src.inertia_dir = get_dir(target, src)
+			step(src, inertia_dir)
+*/
+
+
+		var/throw_mult=1
+		if(istype(src,/mob/living/carbon/human))
+			var/mob/living/carbon/human/H=src
+			throw_mult = H.species.throw_mult
+			if(M_HULK in H.mutations || M_STRONG in H.mutations)
+				throw_mult+=0.5
+		item.throw_at(target, item.throw_range*throw_mult, item.throw_speed*throw_mult)
+		return THREW_SOMETHING
 
 /mob/living/send_to_past(var/duration)
 	..()

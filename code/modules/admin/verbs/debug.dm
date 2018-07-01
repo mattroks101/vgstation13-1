@@ -82,50 +82,7 @@ But you can call procs that are of type /mob/living/carbon/human/proc/ for that 
 
 		var/i
 		for(i = 1, i < argnum + 1, i++) // Lists indexed from 1 forwards in byond
-
-			// Make a list with each index containing one variable, to be given to the proc
-			class = input("What kind of variable?","Variable Type") in list("text","num","type","reference","mob reference","icon","file","client","mob's area", holder.marked_datum ? "marked datum ([holder.marked_datum.type])" : null, "CANCEL")
-
-			if(holder.marked_datum && class == "marked datum ([holder.marked_datum.type])")
-				class = "marked_datum"
-
-			switch(class)
-				if("CANCEL")
-					return
-
-				if("text")
-					lst[i] = input("Enter new text:","Text",null) as text
-
-				if("num")
-					lst[i] = input("Enter new number:","Num",0) as num
-
-				if("type")
-					lst[i] = input("Enter type:","Type") in typesof(/obj,/mob,/area,/turf)
-
-				if("reference")
-					lst[i] = input("Select reference:","Reference",src) as mob|obj|turf|area in world
-
-				if("mob reference")
-					lst[i] = input("Select reference:","Reference",usr) as mob in world
-
-				if("file")
-					lst[i] = input("Pick file:","File") as file
-
-				if("icon")
-					lst[i] = input("Pick icon:","Icon") as icon
-
-				if("client")
-					var/list/keys = list()
-					for(var/mob/M in mob_list)
-						keys += M.client
-					lst[i] = input("Please, select a player!", "Selection", null, null) as null|anything in keys
-
-				if("mob's area")
-					var/mob/temp = input("Select mob", "Selection", usr) as mob in world
-					lst[i] = temp.loc
-
-				if("marked_datum")
-					lst[i] = holder.marked_datum
+			lst[i] = variable_set(src)
 
 		if(targetselected)
 			if(!target)
@@ -139,7 +96,11 @@ But you can call procs that are of type /mob/living/carbon/human/proc/ for that 
 			log_admin("[key_name(src)] called [procname]() with [lst.len ? "the arguments [list2params(lst)]":"no arguments"].")
 			returnval = call(procname)(arglist(lst)) // Pass the lst as an argument list to the proc
 
-		to_chat(usr, "<font color='blue'>[procname] returned: [returnval ? returnval : "null"]</font>")
+		if(isnull(returnval))
+			returnval = "null"
+		else if(returnval == "")
+			returnval = "\"\" (empty string)"
+		to_chat(usr, "<font color='blue'>[procname] returned: [returnval]</font>")
 		feedback_add_details("admin_verb","APC") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
 /client/proc/callatomproc(var/datum/target as anything)
@@ -153,7 +114,6 @@ But you can call procs that are of type /mob/living/carbon/human/proc/ for that 
 		var/lst[] // List reference
 		lst = new/list() // Make the list
 		var/returnval = null
-		var/class = null
 
 		var/procname = input("Proc path, eg: /proc/fake_blood","Path:", null) as text|null
 		if(!procname)
@@ -173,55 +133,16 @@ But you can call procs that are of type /mob/living/carbon/human/proc/ for that 
 
 		var/i
 		for(i = 1, i < argnum + 1, i++) // Lists indexed from 1 forwards in byond
-
-			// Make a list with each index containing one variable, to be given to the proc
-			class = input("What kind of variable?","Variable Type") in list("text", "num", "type", "reference", "mob reference", "icon", "file", "client", "mob's area", holder.marked_datum ? "marked datum ([holder.marked_datum.type])" : null, "CANCEL")
-
-			if(holder.marked_datum && class == "marked datum ([holder.marked_datum.type])")
-				class = "marked_datum"
-
-			switch(class)
-				if("CANCEL")
-					return
-
-				if("text")
-					lst[i] = input("Enter new text:","Text",null) as text
-
-				if("num")
-					lst[i] = input("Enter new number:","Num",0) as num
-
-				if("type")
-					lst[i] = input("Enter type:","Type") in typesof(/obj,/mob,/area,/turf)
-
-				if("reference")
-					lst[i] = input("Select reference:","Reference",src) as mob|obj|turf|area in world
-
-				if("mob reference")
-					lst[i] = input("Select reference:","Reference",usr) as mob in world
-
-				if("file")
-					lst[i] = input("Pick file:","File") as file
-
-				if("icon")
-					lst[i] = input("Pick icon:","Icon") as icon
-
-				if("client")
-					var/list/keys = list()
-					for(var/mob/M in mob_list)
-						keys += M.client
-					lst[i] = input("Please, select a player!", "Selection", null, null) as null|anything in keys
-
-				if("mob's area")
-					var/mob/temp = input("Select mob", "Selection", usr) as mob in world
-					lst[i] = temp.loc
-
-				if("marked_datum")
-					lst[i] = holder.marked_datum
+			lst[i] = variable_set(src)
 
 		log_admin("[key_name(src)] called [target]'s [procname]() with [lst.len ? "the arguments [list2params(lst)]":"no arguments"].")
 		returnval = call(target,procname)(arglist(lst)) // Pass the lst as an argument list to the proc
 
-		to_chat(usr, "<font color='blue'>[procname] returned: [returnval ? returnval : "null"]</font>")
+		if(isnull(returnval))
+			returnval = "null"
+		else if(returnval == "")
+			returnval = "\"\" (empty string)"
+		to_chat(usr, "<font color='blue'>[procname] returned: [returnval]</font>")
 		feedback_add_details("admin_verb","APC") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
 
@@ -823,7 +744,7 @@ Pressure: [env.return_pressure()]"}
 	F << "type,count"
 	var/list/machineinstances = list()
 	for(var/atom/typepath in machines)
-		if(!typepath.type in machineinstances)
+		if(!(typepath.type in machineinstances))
 			machineinstances["[typepath.type]"] = 0
 		machineinstances["[typepath.type]"] += 1
 	for(var/T in machineinstances)
@@ -836,7 +757,7 @@ Pressure: [env.return_pressure()]"}
 	F << "type,count"
 	machineinstances.len = 0
 	for(var/atom/typepath in power_machines)
-		if(!typepath.type in machineinstances)
+		if(!(typepath.type in machineinstances))
 			machineinstances["[typepath.type]"] = 0
 		machineinstances["[typepath.type]"] += 1
 	for(var/T in machineinstances)
@@ -1297,11 +1218,18 @@ client/proc/check_convertables()
 	if(!check_rights(R_SPAWN))
 		return
 
-	var/list/matches[0]
+	//Parse and strip any changed variables (added in curly brackets at the end of the input string)
+	var/variables_start = findtext(object,"{")
 
-	for(var/path in typesof(/datum) - typesof(/turf))
-		if(findtext("[path]", object))
-			matches += path
+	var/list/varchanges = list()
+	if(variables_start)
+		var/parameters = copytext(object,variables_start+1,length(object))//removing the last '}'
+		varchanges = readlist(parameters, ";")
+
+		object = copytext(object, 1, variables_start)
+
+
+	var/list/matches = get_matching_types(object, /datum) - typesof(/turf, /area) //Exclude non-movable atoms
 
 	if(matches.len == 0)
 		to_chat(usr, "Unable to find any matches.")
@@ -1315,12 +1243,16 @@ client/proc/check_convertables()
 		if(!chosen)
 			return
 
-	holder.marked_datum = new chosen()
+	holder.marked_datum = new chosen
 
-	to_chat(usr, "<span class='notify'>A reference to the new [chosen] has been stored in your marked datum.</span>")
-
+	to_chat(usr, "<span class='notify'>A reference to the new [chosen] has been stored in your marked datum. <a href='?_src_=vars;Vars=\ref[holder.marked_datum]'>Click here to access it</a></span>")
 	log_admin("[key_name(usr)] spawned the datum [chosen] to his marked datum.")
 	feedback_add_details("admin_verb","SD") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+
+	if(varchanges.len)
+		_preloader = new(varchanges, chosen)
+		//_preloaded calls load() automatically on atom/New(). However, this proc can also create datums, which don't do that - call load() manually
+		_preloader.load(holder.marked_datum)
 
 /client/proc/vv_marked_datum()
 	set category	= "Debug"
@@ -1348,6 +1280,18 @@ client/proc/check_convertables()
 	else
 		spiral_block(epicenter,max_range,0,1)
 
+/client/proc/check_striketeams()
+	set name = "Check StrikeTeams"
+	set category = "Debug"
+
+	if(!sent_strike_teams || sent_strike_teams.len <= 0)
+		to_chat(usr, "<span class='warning'>No strike teams have been sent so far!</span>")
+		return
+
+	var/teamToDebug = input(usr,"Choose a Strike Team.", "Check StrikeTeams") in sent_strike_teams
+
+	debug_variables(sent_strike_teams[teamToDebug])
+
 /client/proc/view_runtimes()
 	set category = "Debug"
 	set name = "View Runtimes"
@@ -1357,3 +1301,50 @@ client/proc/check_convertables()
 		return
 
 	error_cache.show_to(src)
+
+/client/proc/emergency_shuttle_panel()
+	set name = "Emergency Shuttle Panel"
+	set category = "Debug"
+	if(holder)
+		holder.emergency_shuttle_panel()
+		log_admin("[key_name(usr)] checked the Emergency Shuttle Panel.")
+	feedback_add_details("admin_verb","ESP")
+	return
+
+/client/proc/start_line_profiling()
+	set category = "Profile"
+	set name = "Start line profiling"
+	set desc = "Starts tracking line by line profiling for code lines that support it"
+
+	PROFILE_START
+
+	message_admins("<span class='adminnotice'>[key_name_admin(src)] started line by line profiling.</span>")
+	feedback_add_details("admin_verb","Start line profiling")
+	log_admin("[key_name(src)] started line by line profiling.")
+
+/client/proc/stop_line_profiling()
+	set category = "Profile"
+	set name = "Stop line profiling"
+	set desc = "Stops tracking line by line profiling for code lines that support it"
+
+	PROFILE_STOP
+
+	message_admins("<span class='adminnotice'>[key_name_admin(src)] stopped line by line profiling.</span>")
+	feedback_add_details("admin_verb","Stop line profiling")
+	log_admin("[key_name(src)] stopped line by line profiling.")
+
+/client/proc/show_line_profiling()
+	set category = "Profile"
+	set name = "Show line profiling"
+	set desc = "Shows tracked profiling info from code lines that support it"
+
+	var/sortlist = list(
+		"Avg time"		=	/proc/cmp_profile_avg_time_dsc,
+		"Total Time"	=	/proc/cmp_profile_time_dsc,
+		"Call Count"	=	/proc/cmp_profile_count_dsc
+	)
+	var/sort = input(src, "Sort type?", "Sort Type", "Avg time") as null|anything in sortlist
+	if (!sort)
+		return
+	sort = sortlist[sort]
+	profile_show(src, sort)

@@ -41,6 +41,8 @@
 	emote_hear = list("squawks","bawks")
 	emote_see = list("flutters its wings")
 
+	speak_override = FALSE
+
 	speak_chance = 1 //1% (1 in 100) chance every tick; So about once per 150 seconds, assuming an average tick is 1.5s
 	turns_per_move = 5
 	meat_type = /obj/item/weapon/reagent_containers/food/snacks/cracker/
@@ -114,10 +116,12 @@
 		"It prefers kippin' on it's back.", \
 		"It's a beautiful bird, lovely plumage, innit?")
 
+	var/has_headset = 1 //excluding parrotmorph parrots from gaining headsets when a mob is transformed into a parrot via wizard.
+
 
 /mob/living/simple_animal/parrot/New()
 	..()
-	if(!ears)
+	if(!ears && has_headset)
 		var/headset = pick(/obj/item/device/radio/headset/headset_sec, \
 						/obj/item/device/radio/headset/headset_eng, \
 						/obj/item/device/radio/headset/headset_med, \

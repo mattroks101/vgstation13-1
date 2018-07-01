@@ -207,8 +207,12 @@ obj/machinery/gibber/New()
 
 	var/obj/item/weapon/reagent_containers/food/snacks/meat/allmeat[totalslabs]
 	for (var/i=1 to totalslabs)
-		var/obj/item/weapon/reagent_containers/food/snacks/meat/newmeat = new occupant.meat_type(null, occupant)
-		newmeat.reagents.add_reagent (NUTRIMENT, sourcenutriment / totalslabs) // Thehehe. Fat guys go first
+		var/obj/item/weapon/newmeat
+		if(istype(occupant.meat_type, /obj/item/weapon/reagent_containers))
+			newmeat = new occupant.meat_type(null, occupant)
+			newmeat.reagents.add_reagent (NUTRIMENT, sourcenutriment / totalslabs) // Thehehe. Fat guys go first
+		else
+			newmeat = new occupant.meat_type()
 
 		if(src.occupant.reagents)
 			src.occupant.reagents.trans_to (newmeat, round (sourcetotalreagents / totalslabs, 1)) // Transfer all the reagents from the
@@ -309,7 +313,7 @@ obj/machinery/gibber/New()
 	log_attack("<B>[src]</B> auto-gibbed <B>[key_name(victim)]</B>")
 	victim.death(1)
 	if(ishuman(victim) || ismonkey(victim) || isalien(victim))
-		var/obj/item/organ/brain/B = new(src.loc)
+		var/obj/item/organ/internal/brain/B = new(src.loc)
 		B.transfer_identity(victim)
 		var/turf/Tx = locate(src.x - 2, src.y, src.z)
 		B.forceMove(src.loc)

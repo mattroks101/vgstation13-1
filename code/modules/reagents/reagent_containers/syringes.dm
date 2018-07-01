@@ -107,6 +107,8 @@
 		overlays.len = 0
 		return
 	var/rounded_vol = round(reagents.total_volume,5)
+	if(0 < reagents.total_volume && reagents.total_volume < 5)
+		rounded_vol = 5
 	overlays.len = 0
 	if(ismob(loc))
 		var/injoverlay
@@ -204,6 +206,12 @@
 	if (src.is_empty())
 		to_chat(user, "<span class='warning'>\The [src] is empty.</span>")
 		return
+
+	if(ishuman(target))
+		var/mob/living/carbon/human/H = target
+		if(H.species && (H.species.chem_flags & NO_INJECT))
+			user.visible_message("<span class='warning'>\The [user] attempts to poke \the [H] with \the [src] but it won't go in!</span>", "<span class='notice'>You fail to pierce \the [H] with \the [src].</span>")
+			return
 
 	if (istype(target, /obj/item/clothing/mask/facehugger/lamarr))
 		var/obj/item/clothing/mask/facehugger/lamarr/L = target

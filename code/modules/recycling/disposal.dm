@@ -23,9 +23,13 @@
 	var/flush_count = 0 //this var adds 1 once per tick. When it reaches flush_every_ticks it resets and tries to flush.
 	var/last_sound = 0
 	var/template_path = "disposalsbin.tmpl"
+	var/deconstructable = TRUE	//Set to FALSE for disposal machinery that can be used for transporting players or things, but not tinkered with by players.
 
 	holomap = TRUE
 	auto_holomap = TRUE
+
+/obj/machinery/disposal/no_deconstruct
+	deconstructable = FALSE
 
 // create a new disposal
 // find the attached trunk (if present) and init gas resvr.
@@ -83,7 +87,7 @@
 
 // attack by item places it in to disposal
 /obj/machinery/disposal/attackby(var/obj/item/I, var/mob/user)
-	if(stat & BROKEN || !I || !user)
+	if(stat & BROKEN || !I || !user || !deconstructable)
 		return
 
 	if(!user.has_hand_check())
@@ -123,7 +127,7 @@
 					src.transfer_fingerprints_to(C)
 					C.ptype = 6 // 6 = disposal unit
 					C.anchored = 1
-					C.density = 1
+					C.setDensity(TRUE)
 					C.update()
 					qdel(src)
 				return
@@ -131,7 +135,7 @@
 				to_chat(user, "You need more welding fuel to complete this task.")
 				return
 
-	if(isrobot(user) && !istype(I, /obj/item/weapon/storage/bag/trash) && !istype(user,/mob/living/silicon/robot/mommi) )
+	if(isrobot(user) && !istype(I, /obj/item/weapon/storage/bag/trash) && !isgripper(user.get_active_hand()) && !isMoMMI(user) )
 		return
 
 	if(istype(I, /obj/item/weapon/storage/bag/))
@@ -222,7 +226,7 @@
 	ui_interact(user)
 
 // user interaction
-/obj/machinery/disposal/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+/obj/machinery/disposal/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = NANOUI_FOCUS)
 	var/list/data[0]
 
 	if(air_contents)
@@ -427,6 +431,9 @@
 	var/turf/target
 	playsound(src, 'sound/machines/hiss.ogg', 50, 0, 0)
 	if(H) // Somehow, someone managed to flush a window which broke mid-transit and caused the disposal to go in an infinite loop trying to expel null, hopefully this fixes it
+		if(H.destinationTag)
+			playsound(src, 'sound/misc/yougotmail.wav', 50, 0, 0)
+			visible_message("[bicon(src)]<span class='notice'><font size=4><i>You've got mail!</i></font></span>")
 		H.active = 0 // Stop disposalholder's move() processing so we don't call the trunk's expel() too
 		for(var/atom/movable/AM in H)
 			target = get_offset_target_turf(src.loc, rand(5)-rand(5), rand(5)-rand(5))
@@ -456,6 +463,9 @@
 	else
 		return ..(mover, target, height, air_group)
 
+/obj/machinery/disposal/proc/can_load_crates()
+	return TRUE
+
 /obj/machinery/disposal/MouseDrop_T(atom/movable/dropping, mob/user)
 
 	if(isAI(user))
@@ -472,6 +482,14 @@
 				return
 
 			attackby(dropping, user)
+		else if(istype(dropping, /obj/structure/closet/crate) && can_load_crates())
+			if(do_after(user,src,20))
+				if(dropping.locked_to || user.restrained() || !user.canmove)
+					return
+				user.visible_message("[user] hoists \the [dropping] into \the [src].", "You hoist \the [dropping] into \the [src].")
+				add_fingerprint(user)
+				dropping.forceMove(src)
+				update_icon()
 		return
 
 	//From there, we are working on a mob (as our target, user is supposed to be a mob)
@@ -692,6 +710,7 @@
 	layer = DISPOSALS_PIPE_LAYER
 	plane = ABOVE_PLATING_PLANE
 	var/base_icon_state	// initial icon state on map
+	var/deconstructable = TRUE
 
 	// new pipe, set the icon_state as on map
 /obj/structure/disposalpipe/New()
@@ -909,6 +928,8 @@
 	if(T.intact) 	//has a floortile attached
 		return		// prevent interaction with T-scanner revealed pipes
 
+	if(!deconstructable)
+		return
 	src.add_fingerprint(user)
 	if(istype(I, /obj/item/weapon/weldingtool))
 		var/obj/item/weapon/weldingtool/W = I
@@ -948,7 +969,7 @@
 			C.ptype = 10
 	src.transfer_fingerprints_to(C)
 	C.change_dir(dir)
-	C.density = 0
+	C.setDensity(FALSE)
 	C.anchored = 1
 	C.update()
 
@@ -963,6 +984,9 @@
 /obj/structure/disposalpipe/segment
 	icon_state = "pipe-s"
 
+/obj/structure/disposalpipe/segment/no_deconstruct
+	deconstructable = FALSE
+
 /obj/structure/disposalpipe/segment/New()
 	..()
 	if(icon_state == "pipe-s")
@@ -975,6 +999,9 @@
 //a three-way junction with dir being the dominant direction
 /obj/structure/disposalpipe/junction
 	icon_state = "pipe-j1"
+
+/obj/structure/disposalpipe/junction/no_deconstruct
+	deconstructable = FALSE
 
 /obj/structure/disposalpipe/junction/New()
 	..()
@@ -1335,6 +1362,9 @@
 	var/obj/structure/disposaloutlet/disposaloutlet
 	var/obj/linked
 
+/obj/structure/disposalpipe/trunk/no_deconstruct
+	deconstructable = FALSE
+
 /obj/structure/disposalpipe/trunk/New()
 	. = ..()
 	dpdir = dir
@@ -1403,6 +1433,8 @@
 	var/turf/T = src.loc
 	if(T.intact)
 		return		// prevent interaction with T-scanner revealed pipes
+	if(!deconstructable)
+		return
 	src.add_fingerprint(user)
 	if(istype(I, /obj/item/weapon/weldingtool))
 		var/obj/item/weapon/weldingtool/W = I
@@ -1482,9 +1514,13 @@
 	var/turf/target	// this will be where the output objects are 'thrown' to.
 	var/mode = 0
 	var/obj/structure/disposalpipe/trunk/trunk
+	var/deconstructable = TRUE
 
 	holomap = TRUE
 	auto_holomap = TRUE
+
+/obj/structure/disposaloutlet/no_deconstruct
+	deconstructable = FALSE
 
 /obj/structure/disposaloutlet/New()
 	. = ..()
@@ -1535,7 +1571,7 @@
 		qdel(H)
 
 /obj/structure/disposaloutlet/attackby(var/obj/item/I, var/mob/user)
-	if(!I || !user)
+	if(!I || !user || !deconstructable)
 		return
 	src.add_fingerprint(user)
 	if(isscrewdriver(I))
@@ -1563,7 +1599,7 @@
 				C.ptype = 7 // 7 =  outlet
 				C.update()
 				C.anchored = 1
-				C.density = 1
+				C.setDensity(TRUE)
 				qdel(src)
 			return
 		else

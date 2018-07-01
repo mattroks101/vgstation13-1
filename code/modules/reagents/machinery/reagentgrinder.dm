@@ -1,5 +1,21 @@
-/obj/machinery/reagentgrinder
 
+
+var/global/list/juice_items = list (
+	/obj/item/weapon/reagent_containers/food/snacks/grown/tomato = list(TOMATOJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/carrot = list(CARROTJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/berries = list(BERRYJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/banana = list(BANANA = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/potato = list(POTATO = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/apple = list(APPLEJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/lemon = list(LEMONJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/orange = list(ORANGEJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/lime = list(LIMEJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/watermelon = list(WATERMELONJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/watermelonslice = list(WATERMELONJUICE = 0),
+	/obj/item/weapon/reagent_containers/food/snacks/grown/poisonberries = list(POISONBERRYJUICE = 0),
+	)
+
+/obj/machinery/reagentgrinder
 	name = "All-In-One Grinder"
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "juicer1"
@@ -28,6 +44,7 @@
 		/obj/item/weapon/grown/nettle         = list(FORMIC_ACID = 0),
 		/obj/item/weapon/grown/deathnettle    = list(PHENOL = 0),
 		/obj/item/stack/sheet/charcoal        = list("charcoal" = 20),
+		/obj/item/stack/sheet/bone	          = list(BONEMARROW = 20),
 
 		//Blender Stuff
 		/obj/item/weapon/reagent_containers/food/snacks/grown/soybeans = list(SOYMILK = -10), //I have no fucking idea what most of these numbers mean and I hate them.
@@ -49,26 +66,8 @@
 		/obj/item/weapon/reagent_containers/food = list()
 	)
 
-	var/list/juice_items = list (
-
-		//Juicer Stuff
-		/obj/item/weapon/reagent_containers/food/snacks/grown/tomato = list(TOMATOJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/carrot = list(CARROTJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/berries = list(BERRYJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/banana = list(BANANA = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/potato = list(POTATO = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/apple = list(APPLEJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/lemon = list(LEMONJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/orange = list(ORANGEJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/lime = list(LIMEJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/watermelon = list(WATERMELONJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/watermelonslice = list(WATERMELONJUICE = 0),
-		/obj/item/weapon/reagent_containers/food/snacks/grown/poisonberries = list(POISONBERRYJUICE = 0),
-	)
-
 
 	var/list/holdingitems = list()
-	var/targetMoveKey
 
 /********************************************************************
 **   Adding Stock Parts to VV so preconstructed shit has its candy **
@@ -89,21 +88,6 @@
 	RefreshParts()
 
 	return
-
-/obj/machinery/reagentgrinder/proc/user_moved(var/list/args)
-	var/event/E = args["event"]
-	if(!targetMoveKey)
-		E.handlers.Remove("\ref[src]:user_moved")
-		return
-
-	var/turf/T = args["loc"]
-
-	if(!Adjacent(T))
-		if(E.holder)
-			var/atom/movable/holder = E.holder
-			holder.on_moved.Remove(targetMoveKey)
-		detach()
-
 
 /obj/machinery/reagentgrinder/RefreshParts()
 	var/T = 0
@@ -155,10 +139,6 @@
 				return
 
 			src.beaker =  O
-			if(user.type == /mob/living/silicon/robot)
-				var/mob/living/silicon/robot/R = user
-				R.uneq_active()
-				targetMoveKey =  R.on_moved.Add(src, "user_moved")
 
 			update_icon()
 			src.updateUsrDialog()
@@ -279,9 +259,6 @@
 	if (!beaker)
 		return
 	beaker.forceMove(src.loc)
-	if(istype(beaker, /obj/item/weapon/reagent_containers/glass/beaker/large/cyborg))
-		var/obj/item/weapon/reagent_containers/glass/beaker/large/cyborg/borgbeak = beaker
-		borgbeak.return_to_modules()
 	beaker = null
 	update_icon()
 

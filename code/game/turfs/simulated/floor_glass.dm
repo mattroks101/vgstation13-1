@@ -6,7 +6,7 @@
 	icon = 'icons/turf/space.dmi'
 	icon_state = "0"
 
-	plane = PLANE_SPACE_BACKGROUND
+	plane = SPACE_BACKGROUND_PLANE
 	dynamic_lighting = 0
 	luminosity = 1
 
@@ -30,7 +30,7 @@
 	overlays.Cut()
 	if(!floor_overlay)
 		floor_overlay = image('icons/turf/overlays.dmi', glass_state)
-		//floor_overlay.plane = PLANE_SPACE_DUST
+		//floor_overlay.plane = SPACE_DUST_PLANE
 		floor_overlay.plane = TURF_PLANE
 		floor_overlay.layer = TURF_LAYER
 	overlays += floor_overlay
@@ -186,8 +186,9 @@
 //Someone threw something at us, please advise
 // I don't think this shit works on turfs, but it's here just in case.
 /turf/simulated/floor/glass/hitby(AM as mob|obj)
-
-	..()
+	. =  ..()
+	if(.)
+		return
 	if(ismob(AM))
 		var/mob/M = AM //Duh
 		health -= 10 //We estimate just above a slam but under a crush, since mobs can't carry a throwforce variable

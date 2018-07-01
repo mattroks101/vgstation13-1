@@ -1,5 +1,17 @@
 //handles setting lastKnownIP and computer_id for use by the ban systems as well as checking for multikeying
 /mob/proc/update_Login_details()
+	if(!client)
+		WARNING("update_Login_details(): client for [src] is [client]!")
+		message_admins("<span class='warning'><B>WARNING:</B> <A href='?src=\ref[usr];priv_msg=\ref[src]'>[key_name_admin(src)]</A> has a null .client (BYOND issue, not malicious)!</span>", 1)
+
+	else
+		if(!client.address)
+			WARNING("update_Login_details(): client.address for [src] is [client.address]!")
+			message_admins("<span class='warning'><B>WARNING:</B> <A href='?src=\ref[usr];priv_msg=\ref[src]'>[key_name_admin(src)]</A> has a null .client.address (BYOND issue, not malicious)!</span>", 1)
+		if(!client.computer_id)
+			WARNING("update_Login_details(): client.computer_id for [src] is [client.computer_id]!")
+			message_admins("<span class='warning'><B>WARNING:</B> <A href='?src=\ref[usr];priv_msg=\ref[src]'>[key_name_admin(src)]</A> has a null .client.computer_id (BYOND issue, not malicious)!</span>", 1)
+
 	//Multikey checks and logging
 	lastKnownIP	= client.address
 	computer_id	= client.computer_id
@@ -43,6 +55,8 @@
 	hud_used = new /datum/hud(src)
 	gui_icons = new /datum/ui_icons(src)
 	client.screen += catcher //Catcher of clicks
+	client.screen += clickmaster // click catcher planesmaster on plane 0 with mouse opacity 0 - allows click catcher to work with SEE_BLACKNESS
+	client.screen += clickmaster_dummy // honestly fuck you lummox
 
 	regular_hud_updates()
 
@@ -51,7 +65,7 @@
 
 	delayNextMove(0)
 
-	change_sight(adding = SEE_SELF)
+	change_sight(adding = (SEE_SELF|SEE_BLACKNESS))
 
 	..()
 

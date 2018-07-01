@@ -369,6 +369,34 @@
 	corpsemask = /obj/item/clothing/mask/breath
 	corpsehelmet = /obj/item/clothing/head/helmet/space/rig/mining
 
+/obj/effect/landmark/corpse/janitor
+	name = "Janitor"
+	corpseradio = /obj/item/device/radio/headset/headset_cargo
+	corpseuniform = /obj/item/clothing/under/rank/janitor
+	corpseshoes = /obj/item/clothing/shoes/black
+	corpseback = /obj/item/weapon/storage/backpack
+	corpsebelt = /obj/item/weapon/storage/belt/janitor
+	corpsegloves = /obj/item/clothing/gloves/purple
+	corpsehelmet = /obj/item/clothing/head/soft/purple
+	corpseid = 1
+	corpseidjob = "Janitor"
+	corpseidaccess = "Janitor"
+
+/obj/effect/landmark/corpse/janitor/chempack
+	corpseback = /obj/item/weapon/reagent_containers/chempack
+	corpseglasses = /obj/item/clothing/glasses/sunglasses
+
+/obj/effect/landmark/corpse/pilot
+	name = "pilot"
+	corpseradio = /obj/item/device/radio/headset/headset_sec
+	corpseuniform = /obj/item/clothing/under/aviatoruniform
+	corpseshoes = /obj/item/clothing/shoes/jackboots
+	corpsegloves = /obj/item/clothing/gloves/botanic_leather
+	corpseglasses = /obj/item/clothing/glasses/sunglasses
+	corpsemask = /obj/item/clothing/mask/scarf/red
+	corpsepocket1 = /obj/item/ammo_storage/speedloader/a357
+	corpsepocket2 = /obj/item/clothing/mask/cigarette/cigar
+
 
 /////////////////Officers//////////////////////
 
@@ -427,6 +455,32 @@
 
 /obj/effect/landmark/corpse/russian/ranged
 	corpsehelmet = /obj/item/clothing/head/ushanka
+
+/obj/effect/landmark/corpse/nazi
+	name = "Nazi"
+	corpseshoes = /obj/item/clothing/shoes/jackboots
+	corpseuniform = /obj/item/clothing/under/soldieruniform
+	corpsehelmet = /obj/item/clothing/head/panzer
+
+/obj/effect/landmark/corpse/nazi/soldier
+	name = "Nazi Soldier"
+	corpsehelmet = /obj/item/clothing/head/stalhelm
+	corpsesuit = /obj/item/clothing/suit/soldiercoat
+	corpsegloves = /obj/item/clothing/gloves/black
+	corpsemask = /obj/item/clothing/mask/gas
+
+/obj/effect/landmark/corpse/nazi/officer
+	name = "Nazi Officer"
+	corpseuniform = /obj/item/clothing/under/officeruniform
+	corpsehelmet = /obj/item/clothing/head/naziofficer
+	corpsesuit = /obj/item/clothing/suit/officercoat
+	corpsegloves = /obj/item/clothing/gloves/black
+	corpseglasses = /obj/item/clothing/glasses/sunglasses/sechud
+
+/obj/effect/landmark/corpse/nazi/spacetrooper
+	name = "Nazi Trooper"
+	corpsehelmet = /obj/item/clothing/head/helmet/space/rig/nazi
+	corpsesuit = /obj/item/clothing/suit/space/rig/nazi
 
 //////////////////Admin Use//////////////////////////////
 

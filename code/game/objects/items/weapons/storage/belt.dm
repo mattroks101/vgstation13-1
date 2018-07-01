@@ -46,7 +46,8 @@
 		"/obj/item/weapon/reagent_containers/glass/fuelcan",
 		"/obj/item/device/lightreplacer",
 		"/obj/item/device/device_analyser",
-		"/obj/item/device/silicate_sprayer"
+		"/obj/item/device/silicate_sprayer",
+		"/obj/item/device/geiger_counter"
 		)
 
 /obj/item/weapon/storage/belt/utility/complete/New()
@@ -110,6 +111,7 @@
 		"/obj/item/device/device_analyser",
 		"/obj/item/weapon/rcl",
 		"/obj/item/device/silicate_sprayer",
+		"/obj/item/device/geiger_counter",
 		"/obj/item/weapon/inflatable_dispenser"
 		)
 
@@ -251,7 +253,7 @@
 	fits_max_w_class = 4
 	max_combined_w_class = 28
 	can_only_hold = list(
- 		"/obj/item/weapon/organ/head"
+ 		"/obj/item/organ/external/head"
  	)
 
 
@@ -318,7 +320,7 @@
 		update_icon()
 
 /obj/item/weapon/storage/belt/lazarus/remove_from_storage(obj/item/W as obj, atom/new_location)
-	..()
+	. = ..()
 	update_icon()
 
 /obj/item/weapon/storage/belt/lazarus/antag

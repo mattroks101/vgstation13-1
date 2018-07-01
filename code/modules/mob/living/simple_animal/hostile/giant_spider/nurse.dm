@@ -25,7 +25,7 @@
 			stop_automated_movement = 0
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/proc/check_evolve()
-	if(spider_queens.len < MAX_SQUEENS)
+	if(spider_queens.len < MAX_SQUEENS && !key)	//don't evolve if there's a player inside
 		var/mob/living/simple_animal/hostile/giant_spider/nurse/queen_spider/NQ = new(src.loc)
 		NQ.inherit_mind(src)
 		qdel(src)
@@ -152,8 +152,10 @@
 										if(istype(M, /mob/living/simple_animal/hostile/giant_spider))
 											continue
 										large_cocoon = 1
-										fed++
-										src.visible_message("<span class='warning'>\the [src] sticks a proboscis into \the [cocoon_target] and sucks a viscous substance out.</span>")
+										if(M.getCloneLoss() < 125)
+											fed++
+											src.visible_message("<span class='warning'>\the [src] sticks a proboscis into \the [cocoon_target] and sucks a viscous substance out.</span>")
+											M.adjustCloneLoss(30 * size)
 										M.forceMove(C)
 										C.pixel_x = M.pixel_x
 										C.pixel_y = M.pixel_y
@@ -196,6 +198,8 @@ var/list/spider_queens = list()
 	projectiletype = /obj/item/projectile/web
 	projectilesound = 'sound/weapons/pierce.ogg'
 	ranged = 1
+	size = SIZE_HUGE
+	delimbable_icon = FALSE
 
 /mob/living/simple_animal/hostile/giant_spider/nurse/queen_spider/New()
 	..()

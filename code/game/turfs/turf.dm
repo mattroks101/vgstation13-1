@@ -85,16 +85,6 @@
 			src.Entered(AM)
 			return
 
-/turf/proc/initialize()
-	return
-
-/turf/DblClick()
-	if(istype(usr, /mob/living/silicon/ai))
-		return move_camera_by_click()
-	if(usr.stat || usr.restrained() || usr.lying)
-		return ..()
-	return ..()
-
 /turf/ex_act(severity)
 	return 0
 
@@ -134,7 +124,7 @@
 	var/list/large_dense = list()
 	//Next, check objects to block entry that are on the border
 	for(var/atom/movable/border_obstacle in src)
-		if(border_obstacle.flags&ON_BORDER)
+		if(border_obstacle.flow_flags&ON_BORDER)
 			/*if(ismob(mover) && mover:client)
 				world << "<span class='danger'>ENTER</span>Target(border): checking Cross of [border_obstacle]"*/
 			if(!border_obstacle.Cross(mover, mover.loc) && (forget != border_obstacle) && mover != border_obstacle)
@@ -343,7 +333,7 @@
 		for(var/obj/effect/landmark/zcontroller/c in controller)
 			if(c.down)
 				var/turf/below = locate(src.x, src.y, c.down_target)
-				if((air_master.has_valid_zone(below) || air_master.has_valid_zone(src)) && !istype(below, /turf/space)) // dont make open space into space, its pointless and makes people drop out of the station
+				if((SSair.has_valid_zone(below) || SSair.has_valid_zone(src)) && !istype(below, /turf/space)) // dont make open space into space, its pointless and makes people drop out of the station
 					var/turf/W = src.ChangeTurf(/turf/simulated/floor/open)
 					var/list/temp = list()
 					temp += W
@@ -407,8 +397,8 @@
 		if(tell_universe)
 			universe.OnTurfChange(W)
 
-		if(air_master)
-			air_master.mark_for_update(src)
+		if(SS_READY(SSair))
+			SSair.mark_for_update(src)
 
 		W.levelupdate()
 
@@ -421,12 +411,13 @@
 		//		zone.SetStatus(ZONE_ACTIVE)
 
 		var/turf/W = new N(src)
+		W.initialize()
 
 		if(tell_universe)
 			universe.OnTurfChange(W)
 
-		if(air_master)
-			air_master.mark_for_update(src)
+		if(SS_READY(SSair))
+			SSair.mark_for_update(src)
 
 		W.levelupdate()
 
@@ -539,8 +530,9 @@
 		spawn(0)
 			M.take_damage(100, "brute")
 
-/turf/proc/Bless()
-	turf_flags |= NOJAUNT
+/turf/bless()
+	holy = 1
+	..()
 
 /////////////////////////////////////////////////////////////////////////
 // Navigation procs

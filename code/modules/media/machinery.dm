@@ -87,7 +87,7 @@
 			M.update_music()
 	master_area=null
 
-/obj/machinery/media/Move()
+/obj/machinery/media/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0, glide_size_override = 0)
 	..()
 	if(anchored)
 		update_music()
@@ -107,11 +107,3 @@
 /obj/machinery/media/Destroy()
 	disconnect_media_source()
 	..()
-
-// Needed, or jukeboxes will fail to unhook from previous areas.
-/obj/machinery/media/jukebox/wrenchAnchor(var/mob/user)
-	..(user)
-	if(!anchored)
-		disconnect_media_source()
-	else
-		update_media_source()

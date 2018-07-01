@@ -212,7 +212,8 @@
 	if(emergency_shuttle.online && emergency_shuttle.location < 2)
 		var/timeleft = emergency_shuttle.timeleft()
 		if (timeleft)
-			stat(null, "ETA-[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]")
+			var/acronym = emergency_shuttle.location == 1 ? "ETD" : "ETA"
+			stat(null, "[acronym]-[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]")
 
 
 // This adds the basic clock, shuttle recall timer, and malf_ai info to all silicon lifeforms
@@ -253,9 +254,7 @@
 		if(prob(20))
 			Stun(2)
 
-		var/datum/effect/effect/system/spark_spread/SparkSpread = new
-		SparkSpread.set_up(5, 1, loc)
-		SparkSpread.start()
+		spark(loc, 5)
 
 		return damage
 

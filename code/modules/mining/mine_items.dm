@@ -175,6 +175,10 @@ proc/move_mining_shuttle()
 	on = 1
 	update_brightness()
 
+/obj/item/device/flashlight/lantern/on/dim
+	name = "dim lantern"
+	light_power = 0.6
+
 /*****************************Pickaxe********************************/
 
 //Dig constants defined in setup.dm
@@ -254,6 +258,7 @@ proc/move_mining_shuttle()
 	w_class = W_CLASS_MEDIUM //it is smaller than the pickaxe
 	damtype = "fire"
 	heat_production = 3800
+	source_temperature = TEMPERATURE_PLASMA
 	digspeed = 20 //Can slice though normal walls, all girders, or be used in reinforced wall deconstruction/ light thermite on fire
 	sharpness = 1.0
 	sharpness_flags = SHARP_BLADE | HOT_EDGE | INSULATED_EDGE
@@ -262,9 +267,6 @@ proc/move_mining_shuttle()
 	diggables = DIG_ROCKS | DIG_WALLS
 	drill_verb = "cutting"
 	drill_sound = 'sound/items/Welder.ogg'
-
-/obj/item/weapon/pickaxe/plasmacutter/is_hot()
-	return 1
 
 /obj/item/weapon/pickaxe/diamond
 	name = "diamond pickaxe"
@@ -561,7 +563,7 @@ proc/move_mining_shuttle()
 	maxHealth = 100
 	melee_damage_lower = 15
 	melee_damage_upper = 15
-	environment_smash = 0
+	environment_smash_flags = 0
 	attacktext = "drills"
 	attack_sound = 'sound/weapons/circsawhit.ogg'
 	ranged = 1
@@ -694,7 +696,9 @@ proc/move_mining_shuttle()
 	if(istype(target, /mob/living) && proximity_flag)
 		if(istype(target, /mob/living/simple_animal))
 			var/mob/living/simple_animal/M = target
-
+			if(M.mob_property_flags & MOB_NO_LAZ)
+				to_chat(user, "<span class='warning'>\The [src] is incapable of reviving \the [M].</span>")
+				return
 			if(M.stat == DEAD)
 
 				M.faction = "lazarus \ref[user]"

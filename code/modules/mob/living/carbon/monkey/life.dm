@@ -31,7 +31,7 @@
 		//Lungs required beyond this point
 		if(flag != NO_BREATHE)
 			//First, resolve location and get a breath
-			if(air_master.current_cycle%4==2)
+			if(SSair.current_cycle%4==2)
 				//Only try to take a breath every 4 seconds, unless suffocating
 				breathe()
 			else //Still give containing object the chance to interact
@@ -267,7 +267,7 @@
 				var/obj/location_as_object = loc
 				breath = location_as_object.handle_internal_lifeform(src, BREATH_VOLUME)
 			else if(istype(loc, /turf/))
-				var/breath_moles = environment.total_moles()*BREATH_PERCENTAGE
+				var/breath_moles = environment.total_moles()/environment.volume*CELL_VOLUME*BREATH_PERCENTAGE
 				breath = loc.remove_air(breath_moles)
 
 				// Handle chem smoke effect  -- Doohl

@@ -57,7 +57,7 @@
 
 /obj/effect/alien/resin/proc/healthcheck()
 	if(health <=0)
-		density = 0
+		setDensity(FALSE)
 		qdel(src)
 
 /obj/effect/alien/resin/bullet_act(var/obj/item/projectile/Proj)
@@ -83,7 +83,9 @@
 	healthcheck()
 
 /obj/effect/alien/resin/hitby(AM as mob|obj)
-	..()
+	. = ..()
+	if(.)
+		return
 	for(var/mob/O in viewers(src, null))
 		O.show_message("<span class='danger'>[src] was hit by [AM].</span>", 1)
 	var/tforce = 0
@@ -94,7 +96,6 @@
 	playsound(loc, 'sound/effects/attackblob.ogg', 100, 1)
 	health = max(0, health - tforce)
 	healthcheck()
-	..()
 
 /obj/effect/alien/resin/attack_hand(mob/living/user)
 	user.delayNextAttack(10)
@@ -387,7 +388,6 @@
 	if(istype(target,/atom/movable))
 		var/atom/movable/locker = target
 		locker.lock_atom(src, /datum/locking_category/acid)
-		glide_size = locker.glide_size
 
 	if(isturf(target)) // Turf take twice as long to take down.
 		target_strength = 8
@@ -550,6 +550,15 @@
 	src.health -= damage
 	src.healthcheck()
 
+/obj/effect/alien/egg/ex_act(var/severity)
+	switch(severity)
+		if(1)
+			health -= 70
+		if(2)
+			health -= 25
+		if(3)
+			health -= 15
+	healthcheck()
 
 /obj/effect/alien/egg/proc/healthcheck()
 	if(health <= 0)

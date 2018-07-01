@@ -27,6 +27,8 @@
 	var/obj/abstract/screen/bodytemp = null
 	var/obj/abstract/screen/healths = null
 	var/obj/abstract/screen/throw_icon = null
+	var/obj/abstract/screen/camera_icon = null
+	var/obj/abstract/screen/album_icon = null
 	var/obj/abstract/screen/nutrition_icon = null
 	var/obj/abstract/screen/pressure = null
 	var/obj/abstract/screen/damageoverlay = null
@@ -85,6 +87,7 @@
 	var/stuttering = null	//Carbon
 	var/slurring = null		//Carbon
 	var/real_name = null
+	var/flavor_text = ""
 	var/med_record = ""
 	var/sec_record = ""
 	var/gen_record = ""
@@ -143,13 +146,19 @@
 	var/m_intent = "run"//Living
 	var/lastKnownIP = null
 
+	//Tank used as internals
+	var/obj/item/weapon/tank/internal = null
+
+	//Active storage item (i.e. the backpack or cardboard box that you're looking inside of)
+	var/obj/item/weapon/storage/s_active = null
+
+	//Inventory
+
 	var/active_hand = 1 //Current active hand. Contains an index of the held_items list
 	var/list/obj/item/held_items = list(null, null) //Contains items held in hands
 
-	var/obj/item/weapon/back = null//Human/Monkey
-	var/obj/item/weapon/tank/internal = null//Human/Monkey
-	var/obj/item/weapon/storage/s_active = null//Carbon
-	var/obj/item/clothing/mask/wear_mask = null//Carbon
+	var/obj/item/weapon/back = null
+	var/obj/item/clothing/mask/wear_mask = null
 
 	var/seer = 0 //for cult//Carbon, probably Human
 
@@ -214,7 +223,7 @@
 
 //List of active diseases
 
-	var/viruses = list() // replaces var/datum/disease/virus
+	var/list/datum/disease/viruses = list() // replaces var/datum/disease/virus
 	var/list/resistances = list()
 
 	mouse_drag_pointer = MOUSE_ACTIVE_POINTER

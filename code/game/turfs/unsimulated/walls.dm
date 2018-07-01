@@ -16,6 +16,13 @@
 	opacity = 0
 	canSmoothWith = null
 
+/turf/unsimulated/wall/blastdoor
+	name = "Shuttle Bay Blast Door"
+	desc = "Why it no open!"
+	icon = 'icons/obj/doors/rapid_pdoor.dmi'
+	icon_state = "pdoor1"
+	canSmoothWith = null
+
 /turf/unsimulated/wall/rock
 	name = "unnaturally hard rock wall"
 	icon = 'icons/turf/walls.dmi'
@@ -43,13 +50,16 @@ turf/unsimulated/wall/splashscreen
 	plane = EFFECTS_PLANE
 	canSmoothWith = null
 
-	New()
-		var/path = "icons/splashworks/"
-		var/list/filenames = flist(path)
-		for(var/filename in filenames)
-			if(copytext(filename, length(filename)) == "/")
-				filenames -= filename
-		icon = file("[path][pick(filenames)]")
+/turf/unsimulated/wall/splashscreen/New()
+	if(SNOW_THEME)
+		icon = 'icons/snowstation.gif' // not in the splashworks file so it doesn't appear in other cases
+		return
+	var/path = "icons/splashworks/"
+	var/list/filenames = flist(path)
+	for(var/filename in filenames)
+		if(copytext(filename, length(filename)) == "/")
+			filenames -= filename
+	icon = file("[path][pick(filenames)]")
 
 /turf/unsimulated/wall/other
 	icon_state = "r_wall"

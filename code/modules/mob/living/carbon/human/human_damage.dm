@@ -34,15 +34,19 @@
 	return 0
 
 //These procs fetch a cumulative total damage from all organs
-/mob/living/carbon/human/getBruteLoss()
+/mob/living/carbon/human/getBruteLoss(var/ignore_inorganic = FALSE)
 	var/amount = 0
 	for(var/datum/organ/external/O in organs)
+		if(ignore_inorganic && !O.is_organic())
+			continue
 		amount += O.brute_dam
 	return amount
 
-/mob/living/carbon/human/getFireLoss()
+/mob/living/carbon/human/getFireLoss(var/ignore_inorganic = FALSE)
 	var/amount = 0
 	for(var/datum/organ/external/O in organs)
+		if(ignore_inorganic && !O.is_organic())
+			continue
 		amount += O.burn_dam
 	return amount
 
@@ -170,10 +174,12 @@
 	return parts
 
 //Returns a list of damageable organs
-/mob/living/carbon/human/proc/get_damageable_organs()
+/mob/living/carbon/human/proc/get_damageable_organs(var/ignore_inorganics = FALSE)
 	var/list/datum/organ/external/parts = list()
 	for(var/datum/organ/external/O in organs)
 		if(!O.is_existing())
+			continue
+		if(ignore_inorganics && !O.is_organic())
 			continue
 		if(O.brute_dam + O.burn_dam < O.max_damage)
 			parts += O
@@ -199,8 +205,8 @@ In most cases it makes more sense to use apply_damage() instead! And make sure t
 //Damages ONE external organ, organ gets randomly selected from damagable ones.
 //It automatically updates damage overlays if necesary
 //It automatically updates health status
-/mob/living/carbon/human/take_organ_damage(var/brute, var/burn, var/sharp = 0, var/edge = 0)
-	var/list/datum/organ/external/parts = get_damageable_organs()
+/mob/living/carbon/human/take_organ_damage(var/brute, var/burn, var/sharp = 0, var/edge = 0, var/ignore_inorganics = FALSE)
+	var/list/datum/organ/external/parts = get_damageable_organs(ignore_inorganics)
 	if(!parts.len)
 		return
 	var/datum/organ/external/picked = pick(parts)
@@ -297,6 +303,32 @@ This function restores all organs.
 	if (zone in list( "eyes", "mouth" ))
 		zone = LIMB_HEAD
 	return organs_by_name[zone]
+
+
+//Picks a random usable organ from the organs passed to the arguments
+//You can feed organ references, or organ strings into this obj
+//So this is valid: pick_usable_organ(LIMB_LEFT_LEG, new /datum/organ/external/r_leg)
+/mob/living/carbon/human/proc/pick_usable_organ()
+	var/list/organs = args.Copy()
+
+	ASSERT(organs.len) //this proc should always be called with arguments
+
+	//Convert list of strings to list of organ objects
+	for(var/organ_ in organs)
+		if(istext(organ_))
+			organs.Add(get_organ(organ_))
+			organs.Remove(organ_)
+		else if(!istype(organ_, /datum/organ/external))
+			organs.Remove(organ_)
+
+	var/datum/organ/external/result
+
+	while(!result && organs.len)
+		result = pick_n_take(organs)
+		if(!result.is_usable())
+			result = null
+
+	return result
 
 //Proc that returns a list of organs converted from string IDs
 //get_organs("l_leg", "r_leg") will return a list with left and right leg datums

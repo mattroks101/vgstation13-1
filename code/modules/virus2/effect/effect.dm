@@ -550,6 +550,14 @@
 		var/mob/M = touched
 		add_attacklogs(mob, M, "damaged with keratin spikes",addition = "([M] bumped into [mob])", admin_warn = FALSE)
 
+/datum/disease2/effect/vegan
+	name = "Vegan Syndrome"
+	stage = 2
+
+/datum/disease2/effect/vegan/activate(var/mob/living/carbon/mob)
+	mob.dna.check_integrity()
+	mob.dna.SetSEState(VEGANBLOCK,1)
+	domutcheck(mob, null)
 
 ////////////////////////STAGE 3/////////////////////////////////
 
@@ -580,7 +588,6 @@
 	mob.dna.check_integrity()
 	mob.dna.SetSEState(REMOTETALKBLOCK,1)
 	domutcheck(mob, null)
-
 
 /datum/disease2/effect/mind
 	name = "Lazy Mind Syndrome"
@@ -968,9 +975,44 @@ datum/disease2/effect/lubefoot/deactivate(var/mob/living/carbon/mob)
 	stage = 3
 
 /datum/disease2/effect/teratoma/activate(var/mob/living/carbon/mob)
-	var/organ_type = pick(existing_typesof(/obj/item/organ) + /obj/item/stack/teeth)
+	var/organ_type = pick(existing_typesof(/obj/item/organ/internal) + /obj/item/stack/teeth)
 	var/obj/item/spawned_organ = new organ_type(get_turf(mob))
 	mob.visible_message("<span class='warning'>\A [spawned_organ.name] is extruded from \the [mob]'s body and falls to the ground!</span>","<span class='warning'>\A [spawned_organ.name] is extruded from your body and falls to the ground!</span>")
+
+/datum/disease2/effect/multiarm
+	name = "Polymelia Syndrome"
+	stage = 3
+	max_multiplier = 3
+	var/activated = FALSE
+
+/datum/disease2/effect/multiarm/activate(var/mob/living/carbon/mob)
+	if(activated)
+		return
+	var/hand_amount = round(multiplier)
+	mob.visible_message("<span class='warning'>[mob.take_blood(null, rand(4,12)) ? "With a spray of blood, " : ""][hand_amount > 1 ? "[hand_amount] more arms sprout" : "a new arm sprouts"] from \the [mob]!</span>","<span class='notice'>[hand_amount] more arms burst forth from your back!</span>")
+	mob.set_hand_amount(mob.held_items.len + hand_amount)
+	blood_splatter(mob.loc,mob,TRUE)
+	activated = TRUE
+
+/datum/disease2/effect/multiarm/deactivate(var/mob/living/carbon/mob)
+	if(!activated)
+		return
+	var/hand_amount = round(multiplier)
+	mob.visible_message("<span class='notice'>The arms sticking out of \the [mob]'s back shrivel up and fall off!</span>", "<span class='warning'>Your new arms begin to die off, as the virus can no longer support them.</span>")
+	mob.set_hand_amount(mob.held_items.len - hand_amount)
+	for(var/i = 1 to hand_amount)
+		var/r_or_l = pick("right","left")
+		var/obj/item/organ/external/E
+		var/obj/item/organ/external/EE
+		if(r_or_l == "right")
+			E = new /obj/item/organ/external/r_arm(mob.loc, mob)
+			EE = new /obj/item/organ/external/r_hand(mob.loc, mob)
+		else
+			E = new /obj/item/organ/external/l_arm(mob.loc, mob)
+			EE = new /obj/item/organ/external/l_hand(mob.loc, mob)
+		E.add_child(EE)
+		E.throw_at(get_step(src,pick(alldirs)), rand(1,4), rand(1,3))
+	..()
 
 
 ////////////////////////STAGE 4/////////////////////////////////
@@ -1034,6 +1076,16 @@ datum/disease2/effect/lubefoot/deactivate(var/mob/living/carbon/mob)
 		if(h.species.name != "Tajaran")
 			if(h.set_species("Tajaran"))
 				h.regenerate_icons()
+
+/datum/disease2/effect/zombie
+	name = "Stubborn brain syndrome"
+	stage = 4
+	badness = 2
+
+/datum/disease2/effect/zombie/activate(var/mob/living/carbon/mob)
+	if(ishuman(mob))
+		var/mob/living/carbon/human/h = mob
+		h.become_zombie_after_death = 1
 
 
 /datum/disease2/effect/voxpox
@@ -1473,7 +1525,7 @@ datum/disease2/effect/lubefoot/deactivate(var/mob/living/carbon/mob)
 		var/mob/living/carbon/human/H = mob
 		if(H.get_heart())
 			H.visible_message("<span class='danger'>\The [H]'s heart bursts out of \his chest!</span>","<span class='danger'>Your heart bursts out of your chest!</span>")
-			var/obj/item/organ/blown_heart = H.remove_internal_organ(H,H.get_heart(),H.get_organ(LIMB_CHEST))
+			var/obj/item/organ/internal/blown_heart = H.remove_internal_organ(H,H.get_heart(),H.get_organ(LIMB_CHEST))
 			var/list/spawn_turfs = list()
 			for(var/turf/T in orange(1, H))
 				if(!T.density)
@@ -1483,7 +1535,7 @@ datum/disease2/effect/lubefoot/deactivate(var/mob/living/carbon/mob)
 			var/mob/living/simple_animal/hostile/heart_attack = new(pick(spawn_turfs))
 			heart_attack.appearance = blown_heart.appearance
 			heart_attack.icon_dead = "heart-off"
-			heart_attack.environment_smash = 0
+			heart_attack.environment_smash_flags = 0
 			heart_attack.melee_damage_lower = 15
 			heart_attack.melee_damage_upper = 15
 			heart_attack.health = 50

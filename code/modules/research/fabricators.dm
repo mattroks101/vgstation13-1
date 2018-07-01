@@ -242,11 +242,11 @@
 	if(copytext(M,1,2) == "$")
 		if(src.research_flags & IGNORE_MATS)
 			return 1
-		return round(materials.storage[M] / get_resource_cost_w_coeff(being_built, M), 1)
+		return round(materials.storage[M] / get_resource_cost_w_coeff(being_built, M))
 	else
 		if(src.research_flags & IGNORE_CHEMS)
 			return 1
-		return round(reagents.get_reagent_amount(M) / get_resource_cost_w_coeff(being_built, M), 1)
+		return round(reagents.get_reagent_amount(M) / get_resource_cost_w_coeff(being_built, M))
 	return 0
 
 /obj/machinery/r_n_d/fabricator/proc/build_part(var/datum/design/part)
@@ -477,7 +477,7 @@
 /obj/machinery/r_n_d/fabricator/proc/get_construction_time_w_coeff(var/datum/design/part as obj, var/roundto=1)
 	return round(/*TechTotal(part)*/(part.MatTotal()/FAB_MAT_BASEMOD)*build_time*time_coeff, roundto)
 
-/obj/machinery/r_n_d/fabricator/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null)
+/obj/machinery/r_n_d/fabricator/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open=NANOUI_FOCUS)
 	if(stat & (BROKEN|NOPOWER))
 		return
 	if(user.stat || user.restrained())
@@ -516,7 +516,7 @@
 		parts_list[set_name] = set_name_list
 	data["parts"] = parts_list // assigning the parts data to the data sent to UI
 
-	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data)
+	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data, force_open)
 	if (!ui)
 		ui = new(user, src, ui_key, nano_file, name, FAB_SCREEN_WIDTH, FAB_SCREEN_HEIGHT)
 		ui.set_initial_data(data)
@@ -544,10 +544,10 @@
 		if(usr.machine == src)
 			usr.unset_machine()
 		return 1
-	var/datum/topic_input/filter = new /datum/topic_input(href,href_list)
+	var/datum/topic_input/topic_filter = new /datum/topic_input(href,href_list)
 
 	if(href_list["remove_from_queue"])
-		remove_from_queue(filter.getNum("remove_from_queue"))
+		remove_from_queue(topic_filter.getNum("remove_from_queue"))
 		return 1
 
 	if(href_list["eject"])
@@ -653,8 +653,8 @@
 		src.screen = href_list["screen"]
 
 	if(href_list["queue_move"] && href_list["index"])
-		var/index = filter.getNum("index")
-		var/new_index = index + filter.getNum("queue_move")
+		var/index = topic_filter.getNum("index")
+		var/new_index = index + topic_filter.getNum("queue_move")
 		if(isnum(index) && isnum(new_index))
 			if(IsInRange(new_index,1,queue.len))
 				queue.Swap(index,new_index)
@@ -671,7 +671,7 @@
 			src.sync()
 		return update_queue_on_page()
 	if(href_list["part_desc"])
-		var/obj/part = filter.getObj("part_desc")
+		var/obj/part = topic_filter.getObj("part_desc")
 
 		// critical exploit prevention, do not remove unless you replace it -walter0o
 		if(src.exploit_prevention(part, usr, 1))

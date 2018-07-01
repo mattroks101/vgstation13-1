@@ -134,7 +134,7 @@
 	penetration = 1
 
 /obj/item/projectile/bullet/auto380 //new sec pistol ammo, reverse name because lol compiler
-	damage = 15 
+	damage = 15
 	drowsy = 1
 	agony = 1
 	penetration = 2
@@ -152,7 +152,7 @@
 	weaken = 5
 	embed = 0
 	penetration = 0
-	
+
 /obj/item/projectile/bullet/suffocationbullet//How does this even work?
 	name = "CO2 bullet"
 	damage = 20
@@ -328,6 +328,7 @@
 	icon = 'icons/obj/projectiles_experimental.dmi'
 	icon_state = "hecate"
 	damage = 101//you're going to crit, lad
+	armor_penetration = 75
 	kill_count = 255//oh boy, we're crossing through the entire Z level!
 	stun = 5
 	weaken = 5
@@ -383,13 +384,7 @@
 	bumped = 1
 
 	var/turf/T = get_turf(src)
-	var/mob/living/simple_animal/bee/BEE = new(T)
-	BEE.strength = 1
-	BEE.toxic = 5
-	BEE.mut = 2
-	BEE.feral = 25
-	BEE.icon_state = "bees1-feral"
-
+	var/mob/living/simple_animal/bee/angry/BEE = new(T)
 	if(istype(A,/mob/living))
 		var/mob/living/M = A
 		visible_message("<span class='warning'>\the [M.name] is hit by \the [src.name] in the [parse_zone(def_zone)]!</span>")
@@ -397,8 +392,6 @@
 		admin_warn(M)
 		BEE.forceMove(M.loc)
 		BEE.target = M
-	else
-		BEE.newTarget()
 	bullet_die()
 
 /obj/item/projectile/bullet/APS //Armor-piercing sabot round. Metal rods become this when fired from a railgun.
@@ -550,7 +543,7 @@
 		if(medium_damage_range)
 			if(heavy_damage_range)
 				for(var/atom/movable/A in T.contents)
-					if(!istype(A, /obj/item/weapon/organ/head))
+					if(!istype(A, /obj/item/organ/external/head))
 						A.ex_act(1)
 				T.ex_act(1)
 				heavy_damage_range -= 1
@@ -846,3 +839,9 @@
 
 /obj/item/projectile/bullet/buckshot/bullet_storm/get_radius_turfs(turf/T)
 	return circlerangeturfs(original,5)
+
+/obj/item/projectile/bullet/faggot
+	name = "high-speed faggot"
+	icon = 'icons/obj/food.dmi'
+	icon_state = "faggot"
+	damage = 10

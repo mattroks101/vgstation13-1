@@ -747,6 +747,70 @@ proc/GaussRandRound(var/sigma,var/roundto)
 		progbar.loc = null
 	return 1
 
+// Creates a progress bar locked on `target` and returns it
+/proc/create_progress_bar_on(var/atom/target)
+	var/image/progress_bar = image("icon" = 'icons/effects/doafter_icon.dmi', "loc" = target, "icon_state" = "prog_bar_0")
+	progress_bar.pixel_z = WORLD_ICON_SIZE
+	progress_bar.plane = HUD_PLANE
+	progress_bar.layer = HUD_ABOVE_ITEM_LAYER
+	progress_bar.appearance_flags = RESET_COLOR
+	return progress_bar
+
+/proc/remove_progress_bar(var/mob/user, var/image/progress_bar)
+	if(user && user.client)
+		user.client.images -= progress_bar
+	if(progress_bar)
+		progress_bar.loc = null
+
+/proc/stop_progress_bar(var/mob/user, var/image/progress_bar)
+	progress_bar.icon_state = "prog_bar_stopped"
+	spawn(0.2 SECONDS)
+		remove_progress_bar(user, progress_bar)
+
+
+/proc/do_after_many(var/mob/user, var/list/targets, var/delay, var/numticks = 10, var/needhand = TRUE, var/use_user_turf = FALSE)
+	if(!user || numticks == 0 || !targets || !targets.len)
+		return 0
+
+	var/delay_fraction = round(delay / numticks)
+	if(istype(user.loc, /obj/mecha))
+		use_user_turf = TRUE
+	var/initial_user_location = use_user_turf ? get_turf(user) : user.loc
+	var/holding = user.get_active_hand()
+	var/list/initial_target_locations = list()
+	for(var/atom/target in targets)
+		initial_target_locations[target] = target.loc
+
+	if(user.client && user.client.prefs.progress_bars)
+		for(var/target in targets)
+			if(!targets[target])
+				var/image/new_progress_bar = create_progress_bar_on(target)
+				targets[target] = new_progress_bar
+				user.client.images += new_progress_bar
+	for(var/i = 1 to numticks)
+		for(var/target in targets)
+			var/image/target_progress_bar = targets[target]
+			target_progress_bar.icon_state = "prog_bar_[round(((i / numticks) * 100), 10)]"
+		sleep(delay_fraction)
+		var/user_loc_to_check = use_user_turf ? get_turf(user) : user.loc
+		for(var/atom/target in targets)
+			var/initial_target_location = initial_target_locations[target]
+			if(!user || user.isStunned() || user_loc_to_check != initial_user_location || !target || target.loc != initial_target_location)
+				for(var/target_ in targets)
+					var/image/target_progress_bar = targets[target_]
+					stop_progress_bar(user, target_progress_bar)
+				return FALSE
+		if(needhand && !user.do_after_hand_check(holding))
+			for(var/target_ in targets)
+				var/image/target_progress_bar = targets[target_]
+				stop_progress_bar(user, target_progress_bar)
+			return FALSE
+	for(var/target in targets)
+		var/image/target_progress_bar = targets[target]
+		remove_progress_bar(user, target_progress_bar)
+
+	return TRUE
+
 /proc/do_after(var/mob/user as mob, var/atom/target, var/delay as num, var/numticks = 10, var/needhand = TRUE, var/use_user_turf = FALSE)
 	if(!user || isnull(user))
 		return 0
@@ -755,6 +819,8 @@ proc/GaussRandRound(var/sigma,var/roundto)
 
 	var/delayfraction = round(delay/numticks)
 	var/Location
+	if(istype(user.loc, /obj/mecha))
+		use_user_turf = TRUE
 	if(use_user_turf)	//When this is true, do_after() will check whether the user's turf has changed, rather than the user's loc.
 		Location = get_turf(user)
 	else
@@ -802,7 +868,7 @@ proc/GaussRandRound(var/sigma,var/roundto)
 					if(progbar)
 						progbar.loc = null
 			return 0
-		if(needhand && !(user.get_active_hand() == holding))	//Sometimes you don't want the user to have to keep their active hand
+		if(needhand && !user.do_after_hand_check(holding))	//Sometimes you don't want the user to have to keep their active hand
 			if(progbar)
 				progbar.icon_state = "prog_bar_stopped"
 				spawn(2)
@@ -1067,9 +1133,9 @@ proc/DuplicateObject(obj/original, var/perfectcopy = 0 , var/sameloc = 0)
 			for(var/obj/machinery/door/D2 in T1)
 				doors += D2
 			/*if(T1.parent)
-				air_master.groups_to_rebuild += T1.parent
+				SSair.groups_to_rebuild += T1.parent
 			else
-				air_master.mark_for_update(T1)*/
+				SSair.mark_for_update(T1)*/
 
 	for(var/obj/O in doors)
 		O:update_nearby_tiles()
@@ -1196,7 +1262,7 @@ var/global/list/common_tools = list(
 	if(U == M)
 		return 0
 	if(ishuman(M) && M.lying)
-		if(locate(/obj/machinery/optable,M.loc))
+		if(locate(/obj/machinery/optable,M.loc) || locate(/obj/structure/bed/roller/surgery, M.loc))
 			return 1
 		if(locate(/obj/structure/bed/roller, M.loc) && prob(75))
 			return 1
@@ -1556,9 +1622,10 @@ Game Mode config tags:
 
 // A standard proc for generic output to the msay window, Not useful for things that have their own prefs settings (prayers for instance)
 /proc/output_to_msay(msg)
+	var/sane_msg = strict_ascii(msg)
 	for(var/client/C in admins)
 		if(C.prefs.special_popup)
-			C << output("\[[time_stamp()]] [msg]", "window1.msay_output")
+			C << output("\[[time_stamp()]] [sane_msg]", "window1.msay_output")
 		else
 			to_chat(C, msg)
 
@@ -1612,7 +1679,6 @@ Game Mode config tags:
 /proc/sentStrikeTeams(var/team)
 	return (team in sent_strike_teams)
 
-
 /proc/get_exact_dist(atom/A, atom/B)	//returns the coordinate distance between the coordinates of the turfs of A and B
 	var/turf/T1 = A
 	var/turf/T2 = B
@@ -1621,3 +1687,52 @@ Game Mode config tags:
 	if(!istype(T2))
 		T2 = get_turf(B)
 	return sqrt(((T2.x - T1.x) ** 2) + ((T2.y - T1.y) ** 2))
+
+/proc/seedify(obj/item/O, obj/machinery/seed_extractor/extractor = null, mob/living/user = null)
+	if(!O)
+		CRASH("Something called seedify() without anything to make seeds of.")
+
+	var/min_seeds = 1
+	var/max_seeds = 2
+	var/seedloc = O.loc
+	var/datum/seed/new_seed_type
+
+	if(extractor)
+		seedloc = get_turf(extractor)
+		min_seeds = extractor.min_seeds
+		max_seeds = extractor.max_seeds
+
+	var/produce = rand(min_seeds,max_seeds)
+
+	if(user)
+		user.drop_item(O, force_drop = TRUE)
+
+	if(istype(O, /obj/item/weapon/grown))
+		var/obj/item/weapon/grown/F = O
+		if(F.plantname)
+			new_seed_type = plant_controller.seeds[F.plantname]
+	else
+		if(istype(O, /obj/item/weapon/reagent_containers/food/snacks/grown))
+			var/obj/item/weapon/reagent_containers/food/snacks/grown/F = O
+			if(F.plantname)
+				new_seed_type = plant_controller.seeds[F.plantname]
+		else
+			var/obj/item/F = O
+			if(F.nonplant_seed_type)
+				while(min_seeds <= produce)
+					new F.nonplant_seed_type(seedloc)
+					min_seeds++
+				qdel(F)
+				return TRUE
+
+	if(new_seed_type)
+		while(min_seeds <= produce)
+			var/obj/item/seeds/seeds = new(seedloc)
+			seeds.seed_type = new_seed_type.name
+			seeds.update_seed()
+			min_seeds++
+	else
+		return FALSE
+
+	qdel(O)
+	return TRUE

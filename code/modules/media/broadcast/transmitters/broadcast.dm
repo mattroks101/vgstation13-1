@@ -62,16 +62,16 @@
 	power_connection.connect()
 	update_icon()
 
-/obj/machinery/media/transmitter/broadcast/wrenchAnchor(mob/user)
-	if(..())
-		if(anchored) // We are now anchored
-			power_connection.connect() // Connect to the powernet
-		else // We are now NOT anchored
-			power_connection.disconnect() // Ditch powernet.
-			on=0
-			update_on()
-		return 1
-	return
+/obj/machinery/media/transmitter/broadcast/wrenchAnchor(var/mob/user)
+	. = ..()
+	if(!.)
+		return
+	if(anchored) // We are now anchored
+		power_connection.connect() // Connect to the powernet
+	else // We are now NOT anchored
+		power_connection.disconnect() // Ditch powernet.
+		on=0
+		update_on()
 
 /obj/machinery/media/transmitter/broadcast/proc/hook_media_sources()
 	if(!sources.len)
@@ -230,7 +230,7 @@
 			var/datum/gas_mixture/env = L.return_air()
 			if(env.temperature != MAX_TEMP + T0C)
 
-				var/transfer_moles = 0.25 * env.total_moles()
+				var/transfer_moles = 0.25 * env.total_moles() / env.volume * CELL_VOLUME
 
 				var/datum/gas_mixture/removed = env.remove(transfer_moles)
 

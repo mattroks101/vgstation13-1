@@ -36,7 +36,10 @@
 	desc = "Warning: moustache is fake."
 	icon_state = "fake-moustache"
 	flags = FPRINT
-	body_parts_covered = FACE //totally intentional
+	body_parts_covered = BEARD
+
+/obj/item/clothing/mask/fakemoustache/is_hidden_identity()
+	return TRUE
 
 //scarves (fit in in mask slot)
 /obj/item/clothing/mask/scarf
@@ -73,9 +76,17 @@
 	icon_state = "balaclava"
 	item_state = "balaclava"
 	flags = FPRINT
-	body_parts_covered = FACE
+	body_parts_covered = HEAD|MOUTH|EARS
 	w_class = W_CLASS_SMALL
 	species_fit = list(VOX_SHAPED, GREY_SHAPED)
+
+/obj/item/clothing/mask/balaclava/is_hidden_identity()
+	return TRUE
+
+/obj/item/clothing/mask/balaclava/skimask
+	heat_conductivity = INS_MASK_HEAT_CONDUCTIVITY
+	name = "ski mask"
+	desc = "This NT-brand skimask is sure to keep you warm."
 
 /obj/item/clothing/mask/neorussian
 	name = "neo-Russian mask"
@@ -83,6 +94,7 @@
 	icon_state = "nr_mask"
 	item_state = "nr_mask"
 	body_parts_covered = FACE
+	heat_conductivity = INS_MASK_HEAT_CONDUCTIVITY
 
 /obj/item/clothing/mask/pig
 	name = "pig mask"
@@ -121,6 +133,12 @@
 		canremove = 0		//curses!
 	..()
 
+/obj/item/clothing/mask/horsehead/reindeer //christmas edition
+	name = "reindeer head mask"
+	desc = "A mask made of soft vinyl and latex, representing the head of a reindeer."
+	icon_state = "reindeerhead"
+	item_state = "reindeerhead"
+
 /obj/item/clothing/mask/chapmask
 	name = "venetian mask"
 	desc = "A plain porcelain mask that covers the entire face. Standard attire for particularly unspeakable religions. The eyes are wide shut."
@@ -146,3 +164,50 @@ obj/item/clothing/mask/joy
 	name = "joy mask"
 	desc = "Express your happiness or hide your sorrows with this laughing face with crying tears of joy cutout."
 	icon_state = "joy"
+
+/obj/item/clothing/mask/vamp_fangs
+	name = "false fangs"
+	desc = "For when you want people to think you're a vampire. Glows in the dark!"
+	icon_state = "fangs"
+	item_state = "fangs"
+	var/light_absorbed = 0
+	var/glowy_fangs
+	var/image/glow_fangs
+
+/obj/item/clothing/mask/vamp_fangs/New()
+	..()
+	glow_fangs = image("icon" = 'icons/mob/mask.dmi',"icon_state" = "fangs_glow", "layer" = ABOVE_LIGHTING_LAYER)
+	glow_fangs.plane = LIGHTING_PLANE
+
+/obj/item/clothing/mask/vamp_fangs/equipped(mob/M, var/slot)
+	..()
+	var/mob/living/carbon/human/H = M
+	if(!istype(H))
+		return
+	if(slot == slot_wear_mask && light_absorbed > 1)
+		glowy_fangs = TRUE
+		if(icon_state != "fangs_glow")
+			icon_state = "fangs_glow"
+		H.overlays += glow_fangs
+
+/obj/item/clothing/mask/vamp_fangs/unequipped(mob/living/carbon/human/user, var/from_slot = null)
+	if(from_slot == slot_wear_mask)
+		user.overlays -= glow_fangs
+
+/obj/item/clothing/mask/vamp_fangs/OnMobLife(var/mob/living/carbon/human/wearer)
+	var/turf/T = get_turf(wearer)
+	var/light_amount = T.get_lumcount()
+	if(light_amount < 0)
+		light_absorbed = max(0, light_absorbed/1.25)
+	else
+		light_absorbed = min(10, light_absorbed+=light_amount/2)
+
+	if(light_absorbed < 1 && glowy_fangs)
+		glowy_fangs = FALSE
+		icon_state = "fangs"
+		wearer.overlays -= glow_fangs
+
+	if(light_absorbed >= 1 && !glowy_fangs)
+		glowy_fangs = TRUE
+		icon_state = "fangs_glow"
+		wearer.overlays += glow_fangs

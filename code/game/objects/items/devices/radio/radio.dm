@@ -20,6 +20,7 @@
 	var/list/channels = list() //see communications.dm for full list. First channes is a "default" for :h
 	var/subspace_transmission = 0
 	var/syndie = 0//Holder to see if it's a syndicate encrpyed radio
+	var/raider = 0//same as above but for raiders
 	var/maxf = 1499
 //			"Example" = FREQ_LISTENING|FREQ_BROADCASTING
 	flags = FPRINT | HEAR
@@ -304,7 +305,7 @@
 		speech.job = "Personal AI"
 
 	// --- Cold, emotionless machines. ---
-	else if(isobj(speech.speaker))
+	else if(isobj(speech.speaker) || istype(speech.speaker, /mob/living/simple_animal/spiderbot))
 		speech.job = "Machine"
 
 	// --- Unidentifiable mob ---
@@ -476,6 +477,9 @@
 			return -1
 	if(freq == SYND_FREQ)
 		if(!(src.syndie))//Checks to see if it's allowed on that frequency, based on the encryption keys
+			return -1
+	if(freq == RAID_FREQ)
+		if(!(src.raider))//Checks to see if it's allowed on that frequency, based on the encryption keys, bird edition
 			return -1
 	if (!on)
 		return -1

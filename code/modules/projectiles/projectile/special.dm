@@ -290,7 +290,7 @@ obj/item/projectile/kinetic/New()
 	bumped = 1
 
 	if(A)
-		density = 0
+		setDensity(FALSE)
 		invisibility = 101
 		kill_count = 0
 		if(isliving(A))
@@ -362,6 +362,9 @@ obj/item/projectile/kinetic/New()
 	var/pressure = ONE_ATMOSPHERE * 4.5
 	var/temperature = T0C + 175
 	var/fire_duration
+
+/obj/item/projectile/fire_breath/straight
+	fire_blast_type = /obj/effect/fire_blast/no_spread
 
 /obj/item/projectile/fire_breath/New(turf/T, var/direction, var/F_Dam, var/P, var/T, var/F_Dur)
 	..(T,direction)

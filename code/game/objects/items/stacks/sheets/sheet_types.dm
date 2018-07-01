@@ -5,6 +5,7 @@
  *		Wood
  *		Cloth
  *		Cardboard
+ *		Bones
  */
 
 /*
@@ -92,6 +93,8 @@
 	autoignition_temperature=AUTOIGNITION_WOOD
 	sheettype = "wood"
 	w_type = RECYK_WOOD
+	siemens_coefficient = 0 //no conduct
+
 
 /obj/item/stack/sheet/wood/afterattack(atom/Target, mob/user, adjacent, params)
 	..()
@@ -159,3 +162,12 @@ var/list/datum/stack_recipe/charcoal_recipes = list ()
 /obj/item/stack/sheet/charcoal/New(var/loc, var/amount=null)
 		recipes = charcoal_recipes
 		return ..()
+
+		
+/obj/item/stack/sheet/bone
+	name = "bone"
+	desc = "Boney.  Probably has some marrow left."
+	singular_name = "bone"
+	origin_tech = Tc_BIOTECH + "=1"
+	icon_state = "sheet-bone"
+	//item_state = "bone"

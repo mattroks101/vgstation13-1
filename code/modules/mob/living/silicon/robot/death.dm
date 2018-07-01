@@ -1,7 +1,7 @@
 /mob/living/silicon/robot/gib()
 	//robots don't die when gibbed. instead they drop their MMI'd brain
-	monkeyizing = 1
-	canmove = 0
+	monkeyizing = TRUE
+	canmove = FALSE
 	icon = null
 	invisibility = 101
 
@@ -18,8 +18,8 @@
 
 /mob/living/silicon/robot/dust()
 	death(1)
-	monkeyizing = 1
-	canmove = 0
+	monkeyizing = TRUE
+	canmove = FALSE
 	icon = null
 	invisibility = 101
 
@@ -36,24 +36,22 @@
 /mob/living/silicon/robot/death(gibbed)
 	if(stat == DEAD)
 		return
-	if(!gibbed)
-		emote("deathgasp")
 	stat = DEAD
 	update_canmove()
+	if(!gibbed)
+		emote("deathgasp")
+		updateicon() //Don't call updateicon if you're already null.
 	if(camera)
-		camera.status = 0
+		camera.status = FALSE
 
 	if(in_contents_of(/obj/machinery/recharge_station))//exit the recharge station
 		var/obj/machinery/recharge_station/RC = loc
 		if(RC.upgrading)
-			RC.upgrading = 0
-			RC.upgrade_finished = -1
+			RC.upgrading = FALSE
+			RC.upgrade_finished = -1 //WHY
 		RC.go_out()
 
-	change_sight(adding = SEE_TURFS|SEE_MOBS|SEE_OBJS)
-	see_in_dark = 8
-	see_invisible = SEE_INVISIBLE_LEVEL_TWO
-	updateicon()
+	handle_sensor_modes()
 
 	tod = worldtime2text() //weasellos time of death patch
 	if(mind)

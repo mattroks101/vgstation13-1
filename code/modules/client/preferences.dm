@@ -160,6 +160,7 @@ var/const/MAX_SAVE_SLOTS = 8
 
 	var/list/player_alt_titles = new()		// the default name of a job like "Medical Doctor"
 
+	var/flavor_text = ""
 	var/med_record = ""
 	var/sec_record = ""
 	var/gen_record = ""
@@ -255,7 +256,8 @@ var/const/MAX_SAVE_SLOTS = 8
 	<b>Organs:</b> <a href='byond://?src=\ref[user];preference=organs;task=input'>Set</a><br>
 	<b>Underwear:</b> [gender == MALE ? "<a href ='?_src_=prefs;preference=underwear;task=input'><b>[underwear_m[underwear]]</a>" : "<a href ='?_src_=prefs;preference=underwear;task=input'><b>[underwear_f[underwear]]</a>"]<br>
 	<b>Backpack:</b> <a href ='?_src_=prefs;preference=bag;task=input'><b>[backbaglist[backbag]]</a><br>
-	<b>Nanotrasen Relation</b>:<br><a href ='?_src_=prefs;preference=nt_relation;task=input'><b>[nanotrasen_relation]</b></a>
+	<b>Nanotrasen Relation</b>:<br><a href ='?_src_=prefs;preference=nt_relation;task=input'><b>[nanotrasen_relation]</b></a><br>
+	<b>Flavor Text:</b><a href='byond://?src=\ref[user];preference=flavor_text;task=input'>Set</a><br>
 	</td><td valign='top' width='21%'>
 	<h3>Hair Style</h3>
 	<a href='?_src_=prefs;preference=h_style;task=input'>[h_style]</a><BR>
@@ -327,8 +329,6 @@ var/const/MAX_SAVE_SLOTS = 8
 	<a href='?_src_=prefs;preference=wmp'><b>[(usewmp) ? "WMP (compatibility)" : "VLC (requires plugin)"]</b></a><br>
 	<b>Streaming Volume</b>
 	<a href='?_src_=prefs;preference=volume'><b>[volume]</b></a><br>
-	<b>UI Display:</b>
-	<a href='?_src_=prefs;preference=nanoui'><b>[(usenanoui) ? "NanoUI" : "HTML"]</b></a><br>
 	<b>Progress Bars:</b>
 	<a href='?_src_=prefs;preference=progbar'><b>[(progress_bars) ? "Yes" : "No"]</b></a><br>
 	<b>Pause after first step:</b>
@@ -636,6 +636,8 @@ var/const/MAX_SAVE_SLOTS = 8
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_DEAF,       "Deaf")
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_BLIND,      "Blind")
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_MUTE,       "Mute")
+	HTML += ShowDisabilityState(user,DISABILITY_FLAG_VEGAN,      "Vegan")
+	HTML += ShowDisabilityState(user,DISABILITY_FLAG_ASTHMA,      "Asthma")
 	/*HTML += ShowDisabilityState(user,DISABILITY_FLAG_COUGHING,   "Coughing")
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_TOURETTES,   "Tourettes") Still working on it! -Angelite*/
 
@@ -940,7 +942,7 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 /datum/preferences/proc/process_link(mob/user, list/href_list)
 	if(!user)
 		return
-
+	//testing("preference=[href_list["preference"]]")
 	if(href_list["preference"] == "job")
 		switch(href_list["task"])
 			if("close")
@@ -1257,6 +1259,9 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 					if(new_relation)
 						nanotrasen_relation = new_relation
 
+				if("flavor_text")
+					flavor_text = input(user,"Set the flavor text in your 'examine' verb. This can also be used for OOC notes and preferences!","Flavor Text",html_decode(flavor_text)) as message
+
 				if("limbs")
 					var/list/limb_input = list(
 						"Left Leg [organ_data[LIMB_LEFT_LEG]]" = LIMB_LEFT_LEG,
@@ -1464,8 +1469,6 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 						user.client.media.open()
 						user.client.media.update_music()
 
-				if("nanoui")
-					usenanoui = !usenanoui
 				if("tooltips")
 					tooltips = !tooltips
 				if("progbar")
@@ -1496,6 +1499,7 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 
 				if("save")
 					if(world.timeofday >= (lastPolled + POLLED_LIMIT))
+						SetRoles(user,href_list)
 						save_preferences_sqlite(user, user.ckey)
 						save_character_sqlite(user.ckey, user, default_slot)
 						lastPolled = world.timeofday
@@ -1510,6 +1514,8 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 				if("open_load_dialog")
 					if(!IsGuestKey(user.key))
 						open_load_dialog(user)
+						// DO NOT update window as it'd steal focus.
+						return
 
 				if("close_load_dialog")
 					close_load_dialog(user)
@@ -1571,8 +1577,10 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 
 	character.real_name = real_name
 	character.name = character.real_name
+	character.flavor_text = flavor_text
 	if(character.dna)
 		character.dna.real_name = character.real_name
+		character.dna.flavor_text = character.flavor_text
 
 	character.med_record = med_record
 	character.sec_record = sec_record
@@ -1582,26 +1590,26 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 	if(be_random_body)
 		//random_character(gender) - This just selects a random character from the OLD character database.
 		randomize_appearance_for() // Correct.
-	else
-		character.setGender(gender)
-		character.age = age
 
-		character.r_eyes = r_eyes
-		character.g_eyes = g_eyes
-		character.b_eyes = b_eyes
+	character.setGender(gender)
+	character.age = age
 
-		character.r_hair = r_hair
-		character.g_hair = g_hair
-		character.b_hair = b_hair
+	character.r_eyes = r_eyes
+	character.g_eyes = g_eyes
+	character.b_eyes = b_eyes
 
-		character.r_facial = r_facial
-		character.g_facial = g_facial
-		character.b_facial = b_facial
+	character.r_hair = r_hair
+	character.g_hair = g_hair
+	character.b_hair = b_hair
 
-		character.s_tone = s_tone
+	character.r_facial = r_facial
+	character.g_facial = g_facial
+	character.b_facial = b_facial
 
-		character.h_style = h_style
-		character.f_style = f_style
+	character.s_tone = s_tone
+
+	character.h_style = h_style
+	character.f_style = f_style
 
 
 	character.skills = skills
@@ -1663,8 +1671,6 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 			character.setGender(MALE)
 
 /datum/preferences/proc/open_load_dialog(mob/user)
-
-
 	var/database/query/q = new
 	var/list/name_list[MAX_SAVE_SLOTS]
 
@@ -1676,8 +1682,7 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 		message_admins("Error #: [q.Error()] - [q.ErrorMsg()]")
 		warning("Error #:[q.Error()] - [q.ErrorMsg()]")
 		return 0
-	var/dat = {"<body><tt><center>"}
-	dat += "<b>Select a character slot to load</b><hr>"
+	var/dat = "<center><b>Select a character slot to load</b><hr>"
 	var/counter = 1
 	while(counter <= MAX_SAVE_SLOTS)
 		if(counter==default_slot)
@@ -1689,10 +1694,11 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 				dat += "<a href='?_src_=prefs;preference=changeslot;num=[counter];'>[name_list[counter]]</a><br>"
 		counter++
 
-	dat += {"<hr>
-		<a href='byond://?src=\ref[user];preference=close_load_dialog'>Close</a><br>
-		</center></tt>"}
-	user << browse(dat, "window=saves;size=300x390")
+	dat += "</center>"
+
+	var/datum/browser/browser = new(user, "saves", null, 300, 340)
+	browser.set_content(dat)
+	browser.open(use_onclose=FALSE)
 
 /datum/preferences/proc/close_load_dialog(mob/user)
 	user << browse(null, "window=saves")
@@ -1716,6 +1722,7 @@ NOTE:  The change will take effect AFTER any current recruiting periods."}
 			<dd>Accept this role for this round and all future rounds. You will not be polled again.</dd>
 		</dl>
 	</fieldset>
+	<h2>TO SAVE YOUR SPECIAL ROLE PREFERENCES, PRESS SUBMIT, NOT SAVE SETUP.</h2>
 
 	<table border=\"0\" padding-left = 20px;>
 		<thead>

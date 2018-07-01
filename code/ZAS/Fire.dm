@@ -256,10 +256,10 @@ Attach to transfer valve and open. BOOM.
 	. = ..()
 	dir = pick(cardinal)
 	set_light(3)
-	air_master.active_hotspots.Add(src)
+	SSair.add_hotspot(src)
 
 /obj/effect/fire/Destroy()
-	air_master.active_hotspots.Remove(src)
+	SSair.remove_hotspot(src)
 
 	set_light(0)
 	..()
@@ -350,9 +350,9 @@ datum/gas_mixture/proc/zburn(var/turf/T, force_burn)
 	var/datum/gas/volatile_fuel/fuel = locate() in trace_gases
 
 	if(oxygen && (toxins || fuel))
-		if(QUANTIZE(toxins * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= MOLES_PLASMA_VISIBLE)
+		if(QUANTIZE((toxins / volume * CELL_VOLUME) * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= MOLES_PLASMA_VISIBLE)
 			return 1
-		if(fuel && QUANTIZE(fuel.moles * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= BASE_ZAS_FUEL_REQ)
+		if(fuel && QUANTIZE((fuel.moles / volume * CELL_VOLUME) * zas_settings.Get(/datum/ZAS_Setting/fire_consumption_rate)) >= BASE_ZAS_FUEL_REQ)
 			return 1
 
 	// Check if we're actually in a turf or not before trying to check object fires.

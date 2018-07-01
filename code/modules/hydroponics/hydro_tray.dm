@@ -43,7 +43,8 @@
 	var/force_update           // Set this to bypass the cycle time check.
 	var/skip_aging = 0		   // Don't advance age for the next N cycles.
 
-	var/bees = 0				//Are there currently bees above the tray?
+	var/pollination = 0
+	var/bees = 0				//Are the trays currently affected by the bees' pollination?
 
 	//var/decay_reduction = 0     //How much is mutation decay reduced by?
 	var/weed_coefficient = 1    //Coefficient to the chance of weeds appearing
@@ -511,7 +512,7 @@
 
 /obj/machinery/portable_atmospherics/hydroponics/HasProximity(mob/living/simple_animal/M)
 	if(seed && !dead && seed.carnivorous == 2 && age > seed.maturation)
-		if(istype(M, /mob/living/simple_animal/mouse) || istype(M, /mob/living/simple_animal/lizard) && !M.locked_to && !M.anchored)
+		if(istype(M, /mob/living/simple_animal/mouse) || istype(M, /mob/living/simple_animal/hostile/lizard) && !M.locked_to && !M.anchored)
 			spawn(10)
 				if(!M || !Adjacent(M) || M.locked_to || M.anchored)
 					return // HasProximity() will likely fire a few times almost simultaneously, so spawn() is tricky with it's sanity

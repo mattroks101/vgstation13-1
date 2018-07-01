@@ -17,7 +17,7 @@
 		return
 	c_animation = new /atom/movable/overlay(src.loc)
 	c_animation.name = "cultification"
-	c_animation.density = 0
+	c_animation.setDensity(FALSE)
 	c_animation.anchored = 1
 	c_animation.icon = 'icons/effects/effects.dmi'
 	c_animation.plane = EFFECTS_PLANE
@@ -106,13 +106,13 @@
 		for(var/turf/T1 in range(src,1))
 			findNullRod(T1)
 		if(nullblock)
-			user.visible_message("<span class='warning'>A nearby null rod seems to be blocking the transfer.</span>")
+			user.visible_message("<span class='warning'>A nearby holy item seems to be blocking the transfer.</span>")
 			return
 
 		for(var/turf/T2 in range(IP,1))
 			findNullRod(T2)
 		if(nullblock)
-			user.visible_message("<span class='warning'>A null rod seems to be blocking the transfer on the other side.</span>")
+			user.visible_message("<span class='warning'>A holy item seems to be blocking the transfer on the other side.</span>")
 			return
 
 		user.visible_message("<span class='warning'>You feel air moving from the rune - like as it was swapped with somewhere else.</span>", \
@@ -158,7 +158,7 @@
 	else
 		new /obj/item/weapon/tome(usr.loc)
 	qdel(src)
-	stat_collection.cult.tomes_created++
+	stat_collection.cult_tomes_created++
 	return
 
 /////////////////////////////////////////THIRD RUNE
@@ -199,7 +199,8 @@
 			to_chat(M, "<span class='sinister'>You can now speak and understand the forgotten tongue of the occult.</span>")
 			M.add_language(LANGUAGE_CULT)
 			log_admin("[usr]([ckey(usr.key)]) has converted [M] ([ckey(M.key)]) to the cult at <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[M.loc.x];Y=[M.loc.y];Z=[M.loc.z]'>([M.loc.x], [M.loc.y], [M.loc.z])</a>")
-			stat_collection.cult.converted++
+			add_attacklogs(usr, M, "converted to the Cult of Nar'Sie!")
+			stat_collection.cult_converted++
 			if(M.client)
 				spawn(600)
 					if(M && !M.client)
@@ -223,7 +224,7 @@
 			else if(M.knockdown)
 				to_chat(usr, "<span class='danger'>The ritual didn't work! Either something is disrupting it, or this person just isn't suited to be part of our cult.</span>")
 				to_chat(usr, "<span class='danger'>You have to restrain [M] before the talisman's effects wear off!</span>")
-			else 
+			else
 				to_chat(usr, "<span class='danger'>The ritual didn't work! Either something is disrupting it, or this person just isn't suited to be part of our cult.</span>")
 				to_chat(usr, "<span class='danger'>[M] now knows the truth! Stop \him!</span>")
 			to_chat(M, "<span class='sinister'>Your blood pulses. Your head throbs. The world goes red. All at once you are aware of a horrible, horrible truth. The veil of reality has been ripped away and in the festering wound left behind something sinister takes root.</span>")
@@ -326,7 +327,7 @@
 			summonturfs = list()
 			summoning = 0
 			new /obj/machinery/singularity/narsie/large(src.loc)
-			stat_collection.cult.narsie_summoned = 1
+			stat_collection.cult_narsie_summoned = TRUE
 		return
 
 	currentCountdown--
@@ -482,7 +483,7 @@
 		if(is_sacrifice_target)
 			to_chat(usr, "<span class='warning'>The Geometer of blood wants this mortal for himself.</span>")
 		return fizzle()
-	
+
 
 	is_sacrifice_target = 0
 	find_sacrifice:
@@ -534,7 +535,7 @@
 		"<span class='warning'>Life? I'm alive? I live, again!.</span>", \
 		"<span class='warning'>You hear a faint, slightly familiar whisper.</span>")
 		body_to_sacrifice.visible_message("<span class='warning'>[body_to_sacrifice] is torn apart, a black smoke swiftly dissipating from his remains!</span>", \
-		"<span class='sinister'>You are ingulfed by pain as your blood boils, tearing you apart.</span>", \
+		"<span class='sinister'>You are engulfed in pain as your blood boils, tearing you apart.</span>", \
 		"<span class='sinister'>You hear a thousand voices, all crying in pain.</span>")
 		body_to_sacrifice.gib()
 	if(cult_round)
@@ -944,9 +945,9 @@
 					invocation("rune_sac")
 					I.on_fire = 1
 					I.ashify()
-//Brain
-		else if(istype(A, /obj/item/organ/brain))
-			var/obj/item/organ/brain/R = A
+//Brain & Head
+		else if(istype(A, /obj/item/organ/internal/brain))
+			var/obj/item/organ/internal/brain/R = A
 			var/mob/living/carbon/brain/N = R.brainmob
 			if(N)//the brain is a player's
 				if(cult_round && (N.mind == cult_round.sacrifice_target))
@@ -957,6 +958,19 @@
 					invocation("rune_sac")
 					R.on_fire = 1
 					R.ashify()
+
+		else if(istype(A, /obj/item/organ/external/head/)) //Literally the same as the brain check
+			var/obj/item/organ/external/head/H = A
+			var/mob/living/carbon/brain/N = H.brainmob
+			if(N)//the brain is a player's
+				if(cult_round && (N.mind == cult_round.sacrifice_target))
+					ritualresponse += "You need to place that head back on a body before you can complete your objective."
+				else
+					ritualresponse += "The Geometer of Blood accepts to destroy the head."
+					sacrificedone = 1
+					invocation("rune_sac")
+					H.on_fire = 1
+					H.ashify()
 //Carded AIs
 		else if(istype(A, /obj/item/device/aicard))
 			var/obj/item/device/aicard/D = A
@@ -1036,7 +1050,7 @@
 
 /obj/effect/rune/proc/wall()
 	usr.say("Khari[pick("'","`")]d! Eske'te tannin!")
-	src.density = !src.density
+	setDensity(!density)
 	var/mob/living/user = usr
 	user.take_organ_damage(2, 0)
 	if(src.density)
@@ -1145,7 +1159,7 @@
 		if(iscultist(C) && !C.stat)
 			users+=C
 	if(users.len>=2)
-		var/mob/living/carbon/cultist = input("Choose the one who you want to summon", "Followers of Geometer") as null|anything in (cultists - user)
+		var/mob/living/carbon/cultist = input("Choose the one who you want to summon", "Followers of Geometer") as null|anything in ((cultists - users) - user)
 		if(!cultist)
 			return fizzle()
 		if (cultist == user) //just to be sure.
