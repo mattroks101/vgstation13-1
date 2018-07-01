@@ -1,43 +1,44 @@
-///MACRO FILE//
 //Define your macros here if they're used in general code
 
 //Typechecking macros
 // fun if you want to typecast humans/monkeys/etc without writing long path-filled lines.
 #define ishuman(A) istype(A, /mob/living/carbon/human)
 
-#define isjusthuman(A) (ishuman(A) && A.species && istype(A.species, /datum/species/human))
+#define isjusthuman(A) (ishuman(A) && istype(A:species, /datum/species/human))
 
 #define ismonkey(A) istype(A, /mob/living/carbon/monkey)
 
-#define ismartian(A) istype(A, /mob/living/carbon/martian)
+#define ismartian(A) istype(A, /mob/living/carbon/complex/martian)
 
-#define ishigherbeing(A) (ishuman(A) || ismartian(A))
+#define ishigherbeing(A) (ishuman(A) || ismartian(A) || (ismonkey(A) && A.dexterity_check()))
 
-#define isvox(A) (ishuman(A) && A.species && istype(A.species, /datum/species/vox))
+#define isvox(A) (ishuman(A) && istype(A:species, /datum/species/vox))
 
-#define isdiona(A) (ishuman(A) && A.species && istype(A.species, /datum/species/diona))
+#define isdiona(A) (ishuman(A) && istype(A:species, /datum/species/diona))
 
-#define isgrey(A) (ishuman(A) && A.species && istype(A.species, /datum/species/grey))
+#define isgrey(A) (ishuman(A) && istype(A:species, /datum/species/grey))
 
-#define isplasmaman(A) (ishuman(A) && A.species && istype(A.species, /datum/species/plasmaman))
+#define isplasmaman(A) (ishuman(A) && istype(A:species, /datum/species/plasmaman))
 
-#define isskellington(A) (ishuman(A) && A.species && istype(A.species, /datum/species/skellington))
+#define isskellington(A) (ishuman(A) && istype(A:species, /datum/species/skellington))
 
-#define iscatbeast(A) (ishuman(A) && A.species && istype(A.species, /datum/species/tajaran))
+#define iscatbeast(A) (ishuman(A) && istype(A:species, /datum/species/tajaran))
 
-#define isunathi(A) (ishuman(A) && A.species && istype(A.species, /datum/species/unathi))
+#define isunathi(A) (ishuman(A) && istype(A:species, /datum/species/unathi))
 
-#define isskrell(A) (ishuman(A) && A.species && istype(A.species, /datum/species/skrell))
+#define isskrell(A) (ishuman(A) && istype(A:species, /datum/species/skrell))
 
-#define ismuton(A) (ishuman(A) && A.species && istype(A.species, /datum/species/muton))
+#define ismuton(A) (ishuman(A) && istype(A:species, /datum/species/muton))
 
-#define isgolem(A) (ishuman(A) && A.species && istype(A.species, /datum/species/golem))
+#define isgolem(A) (ishuman(A) && istype(A:species, /datum/species/golem))
 
-#define isslimeperson(A) (ishuman(A) && A.species && istype(A.species, /datum/species/slime))
+#define isslimeperson(A) (ishuman(A) && istype(A:species, /datum/species/slime))
 
-#define ishorrorform(A) (ishuman(A) && A.species && istype(A.species, /datum/species/horror))
+#define ishorrorform(A) (ishuman(A) && istype(A:species, /datum/species/horror))
 
-#define isgrue(A) (ishuman(A) && A.species && istype(A.species, /datum/species/grue))
+#define isgrue(A) (ishuman(A) && istype(A:species, /datum/species/grue))
+
+#define ismushroom(A) ((ishuman(A) && istype(A:species, /datum/species/mushroom)) || (istype(A, /mob/living/carbon/monkey/mushroom)))
 
 #define ishologram(A) (istype(A, /mob/living/simple_animal/hologram/advanced))
 
@@ -183,10 +184,13 @@
 
 #define isID(A) (istype(A, /obj/item/weapon/card/id))
 
+#define isRoboID(A) (istype(A, /obj/item/weapon/card/robot))
+
 #define isPDA(A) (istype(A, /obj/item/device/pda))
 
 #define isfloor(A) (istype(A, /turf/simulated/floor) || istype(A, /turf/unsimulated/floor) || istype(A, /turf/simulated/shuttle/floor))
 
+#define issilent(A) (A.silent || (ishuman(A) && (A:miming || A:species:flags & IS_SPECIES_MUTE))) //Remember that silent is not the same as miming. Miming you can emote, silent you can't gesticulate at all
 //Macros for antags
 
 #define isvampire(H) ((H.mind in ticker.mode.vampires) || H.mind && H.mind.vampire)
@@ -273,5 +277,6 @@ proc/get_space_area()
 // For areas that are on the map, `x` is the coordinate of the turf with the lowest z, y, and x coordinate (in that order) that is contained by the area.
 #define is_area_in_map(A) (A.x)
 
-#define SNOW_THEME (map.snow_theme || Holiday == "Christmas Eve" || Holiday == "Christmas")
+#define SNOW_THEME (map.snow_theme || Holiday == XMAS || Holiday == XMAS_EVE)
 
+#define get_conductivity(A) (A ? A.siemens_coefficient : 1)

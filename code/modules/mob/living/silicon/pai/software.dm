@@ -289,7 +289,7 @@
 					var/mob/M = get_holder_of_type(loc, /mob)
 					if(M) //Sanity
 						M.reagents.add_reagent(href_list["chem"], 15)
-						playsound(get_turf(loc), 'sound/effects/bubbles.ogg', 50, 1)
+						playsound(loc, 'sound/effects/bubbles.ogg', 50, 1)
 				else
 					to_chat(src, "<span class='warning'>Charge interrupted.</span>")
 		if("foodsynth")
@@ -305,7 +305,7 @@
 				var/mob/M = get_holder_of_type(loc, /mob)
 				if(M)
 					M.put_in_hands(F)
-				playsound(get_turf(loc), 'sound/machines/foodsynth.ogg', 50, 1)
+				playsound(loc, 'sound/machines/foodsynth.ogg', 50, 1)
 		if("flashlight")
 			if(href_list["toggle"])
 				lighted = !lighted
@@ -581,31 +581,34 @@
 /mob/living/silicon/pai/proc/softwareAtmo()
 	var/dat = "<h3>Atmospheric Sensor</h4>"
 
-	var/turf/T = get_turf(loc)
-	if (isnull(T))
+	if (isnull(loc))
 		dat += "Unable to obtain a reading.<br>"
 	else
-		var/datum/gas_mixture/environment = T.return_air()
+		var/datum/gas_mixture/environment = loc.return_air()
 
-		var/pressure = environment.return_pressure()
-		var/total_moles = environment.total_moles()
+		if(isnull(environment))
+			dat += "No gasses detected.<br>"
 
-		dat += "Air Pressure: [round(pressure,0.1)] kPa<br>"
+		else
+			var/pressure = environment.return_pressure()
+			var/total_moles = environment.total_moles()
 
-		if (total_moles)
-			var/o2_level = environment.oxygen/total_moles
-			var/n2_level = environment.nitrogen/total_moles
-			var/co2_level = environment.carbon_dioxide/total_moles
-			var/plasma_level = environment.toxins/total_moles
-			var/unknown_level =  1-(o2_level+n2_level+co2_level+plasma_level)
+			dat += "Air Pressure: [round(pressure,0.1)] kPa<br>"
 
-			dat += {"Nitrogen: [round(n2_level*100)]%<br>
-				Oxygen: [round(o2_level*100)]%<br>
-				Carbon Dioxide: [round(co2_level*100)]%<br>
-				Plasma: [round(plasma_level*100)]%<br>"}
-			if(unknown_level > 0.01)
-				dat += "OTHER: [round(unknown_level)]%<br>"
-		dat += "Temperature: [round(environment.temperature-T0C)]&deg;C<br>"
+			if (total_moles)
+				var/o2_level = environment.oxygen/total_moles
+				var/n2_level = environment.nitrogen/total_moles
+				var/co2_level = environment.carbon_dioxide/total_moles
+				var/plasma_level = environment.toxins/total_moles
+				var/unknown_level =  1-(o2_level+n2_level+co2_level+plasma_level)
+
+				dat += {"Nitrogen: [round(n2_level*100)]%<br>
+					Oxygen: [round(o2_level*100)]%<br>
+					Carbon Dioxide: [round(co2_level*100)]%<br>
+					Plasma: [round(plasma_level*100)]%<br>"}
+				if(unknown_level > 0.01)
+					dat += "OTHER: [round(unknown_level)]%<br>"
+			dat += "Temperature: [round(environment.temperature-T0C)]&deg;C<br>"
 
 	dat += {"<a href='byond://?src=\ref[src];software=atmosensor;sub=0'>Refresh Reading</a> <br>
 		<br>"}
@@ -652,7 +655,7 @@ Target Machine: "}
 		if(hackprogress >= 100)
 			hackprogress = 0
 			hacktarget = null
-			playsound(get_turf(loc), 'sound/machines/ding.ogg', 50, 1)
+			playsound(loc, 'sound/machines/ding.ogg', 50, 1)
 			return 1
 		sleep(10)			// Update every 1 second
 

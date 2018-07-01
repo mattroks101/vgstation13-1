@@ -74,7 +74,6 @@ What is the naming convention for planes or layers?
 
 #define ABOVE_PLATING_PLANE		-3
 
-	#define HOLOMAP_LAYER			1 // NOTE: ENSURE this is equal to the one at ABOVE_TURF_PLANE!
 	#define CATWALK_LAYER			2
 	#define DISPOSALS_PIPE_LAYER	3
 	#define LATTICE_LAYER			4
@@ -216,7 +215,7 @@ What is the naming convention for planes or layers?
 #define FULLSCREEN_PLANE		22		// for fullscreen overlays that do not cover the hud.
 
 	#define FULLSCREEN_LAYER	 	0
-	#define DAMAGE_LAYER 			1
+	#define DAMAGE_HUD_LAYER 			1
 	#define IMPAIRED_LAYER 			2
 	#define BLIND_LAYER				3
 	#define CRIT_LAYER 				4
@@ -250,3 +249,17 @@ var/obj/abstract/screen/plane_master/clickmaster/clickmaster = new()
 	plane = BASE_PLANE
 
 var/obj/abstract/screen/plane_master/clickmaster_dummy/clickmaster_dummy = new()
+
+// returns a list with the objects sorted depending on their layer, with the lowest objects being the first in the list and the highest objects being last
+/proc/plane_layer_sort(var/list/to_sort)
+	var/list/sorted = list()
+	for(var/current_atom in to_sort)
+		var/compare_index
+		for(compare_index = sorted.len, compare_index > 0, --compare_index) // count down from the length of the list to zero.
+			var/atom/compare_atom = sorted[compare_index] // compare to the next object down the list.
+			if(compare_atom.plane < current_atom:plane) // is this object below our current atom?
+				break
+			else if((compare_atom.plane == current_atom:plane) && (compare_atom.layer <= current_atom:layer))	// is this object below our current atom?
+				break
+		sorted.Insert(compare_index+1, current_atom) // insert it just above the atom it was higher than - or at the bottom if it was higher than nothing.
+	return sorted // return the sorted list.

@@ -444,7 +444,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 /obj/item/device/pda/trader
 	name = "Trader PDA"
 	desc = "Much good for trade."
-	note = "Congratulations, your station ãplU‰%ZÃ’67ÕEz4Æ¦U¦ŸÉ8¥E1ÀÓÐ‹îöÈ~±šÞ@¡ÐT¥u1B¤Õkñ@iž8÷NJŠó"
+	note = "Congratulations, your station ï¿½plUï¿½%ZÃ’67ï¿½Ez4Æ¦Uï¿½ï¿½ï¿½8ï¿½E1ï¿½ï¿½Ð‹ï¿½ï¿½ï¿½~ï¿½ï¿½ï¿½@ï¿½ï¿½Tï¿½u1Bï¿½ï¿½kï¿½@iï¿½8ï¿½NJï¿½ï¿½"
 	icon_state = "pda-trader"
 	default_cartridge = /obj/item/weapon/cartridge/trader
 
@@ -851,31 +851,34 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			if (3)
 				dat += "<h4><span class='pda_icon pda_atmos'></span> Atmospheric Readings</h4>"
 
-				var/turf/T = get_turf(user.loc)
-				if (isnull(T))
+				if (isnull(user.loc))
 					dat += "Unable to obtain a reading.<br>"
 				else
-					var/datum/gas_mixture/environment = T.return_air()
+					var/datum/gas_mixture/environment = user.loc.return_air()
 
-					var/pressure = environment.return_pressure()
-					var/total_moles = environment.total_moles()
+					if(!environment)
+						dat += "No gasses detected.<br>"
 
-					dat += "Air Pressure: [round(pressure,0.1)] kPa<br>"
+					else
+						var/pressure = environment.return_pressure()
+						var/total_moles = environment.total_moles()
 
-					if (total_moles)
-						var/o2_level = environment.oxygen/total_moles
-						var/n2_level = environment.nitrogen/total_moles
-						var/co2_level = environment.carbon_dioxide/total_moles
-						var/plasma_level = environment.toxins/total_moles
-						var/unknown_level =  1-(o2_level+n2_level+co2_level+plasma_level)
+						dat += "Air Pressure: [round(pressure,0.1)] kPa<br>"
 
-						dat += {"Nitrogen: [round(n2_level*100)]%<br>
-							Oxygen: [round(o2_level*100)]%<br>
-							Carbon Dioxide: [round(co2_level*100)]%<br>
-							Plasma: [round(plasma_level*100)]%<br>"}
-						if(unknown_level > 0.01)
-							dat += "OTHER: [round(unknown_level)]%<br>"
-					dat += "Temperature: [round(environment.temperature-T0C)]&deg;C<br>"
+						if (total_moles)
+							var/o2_level = environment.oxygen/total_moles
+							var/n2_level = environment.nitrogen/total_moles
+							var/co2_level = environment.carbon_dioxide/total_moles
+							var/plasma_level = environment.toxins/total_moles
+							var/unknown_level =  1-(o2_level+n2_level+co2_level+plasma_level)
+
+							dat += {"Nitrogen: [round(n2_level*100)]%<br>
+								Oxygen: [round(o2_level*100)]%<br>
+								Carbon Dioxide: [round(co2_level*100)]%<br>
+								Plasma: [round(plasma_level*100)]%<br>"}
+							if(unknown_level > 0.01)
+								dat += "OTHER: [round(unknown_level)]%<br>"
+						dat += "Temperature: [round(environment.temperature-T0C)]&deg;C<br>"
 				dat += "<br>"
 
 			if (5)
@@ -1480,9 +1483,9 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				id.virtual_wallet.money -= amount
 				withdraw_arbitrary_sum(user,amount)
 				if(prob(50))
-					playsound(get_turf(src), 'sound/items/polaroid1.ogg', 50, 1)
+					playsound(src, 'sound/items/polaroid1.ogg', 50, 1)
 				else
-					playsound(get_turf(src), 'sound/items/polaroid2.ogg', 50, 1)
+					playsound(src, 'sound/items/polaroid2.ogg', 50, 1)
 
 				var/datum/transaction/T = new()
 				T.target_name = user.name
@@ -1814,12 +1817,12 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				if (last_text && world.time < last_text + 5)
 					return
 				last_text = world.time
-				for(var/obj/machinery/telecomms/pda_multicaster/multicaster in telecomms_list)
+				for(var/obj/machinery/pda_multicaster/multicaster in pda_multicasters)
 					if(multicaster.check_status())
 						multicaster.multicast(target,src,usr,t)
 						tnote += "<i><b>&rarr; To [target]:</b></i><br>[t]<br>"
 						return
-				to_chat(usr, "[bicon(src)]<span class='warning'>The PDA's screen flashes, 'Error, Messaging server is not responding.'</span>")
+				to_chat(usr, "[bicon(src)]<span class='warning'>The PDA's screen flashes, 'Error, CAMO server is not responding.'</span>")
 
 			if("transferFunds")
 				if(!id)

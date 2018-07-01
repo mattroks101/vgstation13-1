@@ -1,12 +1,14 @@
 
 /obj/item/weapon/robot_module/mommi
 	name = "mobile mmi robot module"
+	quirk_flags = MODULE_CAN_BE_PUSHED | MODULE_HAS_MAGPULSE | MODULE_CAN_HANDLE_CHEMS | MODULE_CAN_BUY
 	languages = list()
-	no_slip = TRUE
 	sprites = list("Basic" = "mommi")
 	respawnables = list (/obj/item/stack/cable_coil)
 	respawnables_max_amount = MOMMI_MAX_COIL
+	default_modules = FALSE
 	var/ae_type = "Default" //Anti-emancipation override type, pretty much just fluffy.
+	var/law_type = "Default"
 
 /obj/item/weapon/robot_module/mommi/New(var/mob/living/silicon/robot/R)
 	..()
@@ -28,6 +30,8 @@
 	modules += new /obj/item/device/holomap(src)
 	modules += new /obj/item/device/station_map(src)
 	modules += new /obj/item/device/silicate_sprayer(src)
+	modules += new /obj/item/borg/fire_shield
+
 	var/obj/item/stack/cable_coil/W = new /obj/item/stack/cable_coil(src)
 	W.amount = MOMMI_MAX_COIL
 	W.max_amount = MOMMI_MAX_COIL
@@ -66,9 +70,20 @@
 
 /obj/item/weapon/robot_module/mommi/soviet/New(var/mob/living/silicon/robot/R) //Powercreep!
 	..()
+
+	quirk_flags |= MODULE_CAN_HANDLE_FOOD //Let them be able to handle bartending machinery.
+
 	modules += new /obj/item/device/rcd/borg/engineering(src)
 	modules += new /obj/item/device/instrument/instrument_synth(src)
 	modules += new /obj/item/device/rcd/borg/rsf/soviet(src)
 	modules += new /obj/item/weapon/soap/syndie(src)
 	modules += new /obj/item/weapon/pickaxe/plasmacutter(src)
 	modules += new /obj/item/weapon/storage/bag/ore/auto(src)
+
+/obj/item/weapon/robot_module/mommi/cogspider
+	name = "Gravekeeper belt of holding."
+	speed_modifier = COGSPIDER_SPEED_MODIFIER
+	sprites = list(
+		"Gravekeeper" = "cogspider"
+		)
+	law_type = "Gravekeeper"
