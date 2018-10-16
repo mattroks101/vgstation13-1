@@ -81,7 +81,7 @@
 	armor_absorb = list(melee = 25, bullet = 20, laser = 20, energy = -5, bomb = 0, bio = 0, rad = 0)
 
 
-/obj/item/weapon/armor_plate/proc/receive_damage(var/type, var/amount)
+/obj/item/weapon/armor_plate/proc/take_damage(var/type, var/amount)
 	if(type == BRUTE || type == BURN)
 		health -= amount
 	playsound(get_turf(src), 'sound/effects/Glasshit.ogg', 70, 1)

@@ -180,9 +180,6 @@
 	// Discord crap.
 	var/discord_url
 	var/discord_password
-	
-	// Weighted Votes
-	var/weighted_votes = 0
 
 	// Weighted Votes
 	var/weighted_votes = 0
