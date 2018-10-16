@@ -60,9 +60,9 @@
 	var/amount = arguments["amount"]
 	if(amount <= 0)
 		return
-	var/type = arguments["type"]
+	//var/type = arguments["type"]
 
-	P.receive_damage(type, amount)
+	//P.receive_damage(type, amount)
 	if(P.gcDestroyed)
 		P = null
 
